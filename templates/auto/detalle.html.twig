@@ -1,0 +1,84 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ auto.nombre }}{% endblock %}
+
+{% block body %}
+    <a class="enlace volver" href="{{ path('auto_listado') }}">{{ 'auto.volver'|trans }}</a>
+
+    <article class="detalle">
+        <div class="galeria" data-controller="galeria">
+            {% if auto.medios is empty %}
+                <div class="galeria__principal"><span class="sin-foto">{{ 'auto.sin_medios'|trans }}</span></div>
+            {% else %}
+                <div class="galeria__principal">
+                    {% for medio in auto.medios %}
+                        <div class="galeria__slide" data-galeria-target="slide" {{ not loop.first ? 'hidden' }}>
+                            {% include 'auto/_medio.html.twig' %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if auto.medios|length > 1 %}
+                    <div class="galeria__miniaturas">
+                        {% for medio in auto.medios %}
+                            <button type="button" class="miniatura {{ loop.first ? 'activa' }}"
+                                    data-galeria-target="miniatura"
+                                    data-action="galeria#mostrar"
+                                    data-galeria-indice-param="{{ loop.index0 }}"
+                                    aria-label="{{ (medio.esImagen ? 'auto.ver_foto' : 'auto.ver_video')|trans({numero: loop.index}) }}">
+                                {% if medio.esImagen %}
+                                    <img src="{{ medio.url }}" alt="" loading="lazy">
+                                {% else %}
+                                    <span>▶</span>
+                                {% endif %}
+                            </button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <div class="ficha">
+            <h1>{{ auto.marca }} {{ auto.modelo }}</h1>
+            <p class="precio precio--grande">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
+            <p>{{ auto.descripcion.en(app.locale) }}</p>
+
+            <dl class="especificaciones">
+                <div><dt>{{ 'auto.anio'|trans }}</dt><dd>{{ auto.anio }}</dd></div>
+                <div><dt>{{ 'auto.kilometraje'|trans }}</dt><dd>{{ auto.kilometraje|numero }} km</dd></div>
+                <div><dt>{{ 'auto.combustible'|trans }}</dt><dd>{{ auto.combustible|trans({}, 'valores') }}</dd></div>
+                <div><dt>{{ 'auto.transmision'|trans }}</dt><dd>{{ auto.transmision|trans({}, 'valores') }}</dd></div>
+                <div><dt>{{ 'auto.carroceria'|trans }}</dt><dd>{{ auto.carroceria|trans({}, 'valores') }}</dd></div>
+            </dl>
+
+            {% if auto.tieneDatosMotor %}
+                <h2 class="ficha__subtitulo">{{ 'auto.motor_prestaciones'|trans }}</h2>
+                <dl class="especificaciones">
+                    {% if auto.motor %}<div><dt>{{ 'auto.motor'|trans }}</dt><dd>{{ auto.motor }}</dd></div>{% endif %}
+                    {% if auto.potencia %}<div><dt>{{ 'auto.potencia'|trans }}</dt><dd>{{ auto.potencia|numero }} hp</dd></div>{% endif %}
+                    {% if auto.torque %}<div><dt>{{ 'auto.torque'|trans }}</dt><dd>{{ auto.torque|numero }} Nm</dd></div>{% endif %}
+                    {% if auto.traccion %}<div><dt>{{ 'auto.traccion'|trans }}</dt><dd>{{ auto.traccion|trans({}, 'valores') }}</dd></div>{% endif %}
+                    {% if auto.aceleracion %}<div><dt>{{ 'auto.aceleracion'|trans }}</dt><dd>{{ auto.aceleracion|numero }} s</dd></div>{% endif %}
+                    {% if auto.velocidadMaxima %}<div><dt>{{ 'auto.velocidad_maxima'|trans }}</dt><dd>{{ auto.velocidadMaxima|numero }} km/h</dd></div>{% endif %}
+                </dl>
+            {% endif %}
+        </div>
+    </article>
+
+    <section class="consulta" id="consulta">
+        <div class="consulta__texto">
+            <h2>{{ 'consulta.titulo'|trans }}</h2>
+            <p>{{ 'consulta.intro'|trans({auto: auto.nombre}) }}</p>
+        </div>
+        {{ form_start(form, {attr: {class: 'formulario formulario--dos', novalidate: 'novalidate'}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.nombre) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.telefono) }}
+            <div class="formulario__ancho">{{ form_row(form.mensaje) }}</div>
+            <div class="formulario__ancho">
+                <button type="submit" class="boton">{{ 'consulta.enviar'|trans }}</button>
+            </div>
+        {{ form_end(form) }}
+    </section>
+{% endblock %}

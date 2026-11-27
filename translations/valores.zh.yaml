@@ -1,0 +1,20 @@
+# Valores de combustible, transmisión y carrocería tal como están en data/autos.json (español).
+# Si se agrega un valor nuevo en el JSON, añadirlo aquí y en los otros 4 idiomas.
+"Gasolina": "汽油"
+"Diésel": "柴油"
+"Eléctrico": "纯电动"
+"Híbrido": "混合动力"
+"Manual": "手动"
+"Automática": "自动"
+"Coupé": "轿跑车"
+"Sedán": "轿车"
+"SUV": "SUV"
+"Hatchback": "两厢车"
+"Convertible": "敞篷车"
+"Pickup": "皮卡"
+"Trasera": "后轮驱动"
+"Delantera": "前轮驱动"
+"Integral": "全轮驱动"
+"4x4": "四轮驱动"
+# Opción vacía de los desplegables del panel.
+"—": "—"

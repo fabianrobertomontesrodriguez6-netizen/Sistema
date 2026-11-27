@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'landing.titulo'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="landing">
+        <div class="landing__texto">
+            <p class="landing__antetitulo">AutoPlaza</p>
+            <h1>{{ 'landing.encabezado'|trans }}</h1>
+            <p class="landing__lema">{{ 'landing.lema'|trans({total: total}) }}</p>
+            <ul class="landing__ventajas">
+                <li>{{ 'landing.ventaja_revisados'|trans }}</li>
+                <li>{{ 'landing.ventaja_fichas'|trans }}</li>
+                <li>{{ 'landing.ventaja_contacto'|trans }}</li>
+            </ul>
+        </div>
+
+        <div class="panel-entrada">
+            <h2>{{ 'landing.entrar'|trans }}</h2>
+
+            {% if error %}
+                <p class="aviso aviso--error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+            {% endif %}
+
+            <form method="post" action="{{ path('login_check') }}" class="formulario">
+                <div>
+                    <label for="email">{{ 'registro.email'|trans }}</label>
+                    <input type="email" id="email" name="email" value="{{ ultimo_email }}" autocomplete="email" required autofocus>
+                </div>
+                <div>
+                    <label for="password">{{ 'registro.password'|trans }}</label>
+                    <input type="password" id="password" name="password" autocomplete="current-password" required>
+                </div>
+                <label class="casilla">
+                    <input type="checkbox" name="_remember_me"> {{ 'landing.recordarme'|trans }}
+                </label>
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                <button type="submit" class="boton boton--ancho">{{ 'landing.entrar'|trans }}</button>
+            </form>
+
+            <p class="panel-entrada__pie">
+                {{ 'landing.sin_cuenta'|trans }}
+                <a class="enlace" href="{{ path('registro') }}">{{ 'landing.crear_cuenta'|trans }}</a>
+            </p>
+        </div>
+    </section>
+
+    {% if portadas is not empty %}
+        <ul class="landing__fotos" aria-hidden="true">
+            {% for auto in portadas %}
+                <li><img src="{{ auto.portada.url }}" alt="" loading="lazy"></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

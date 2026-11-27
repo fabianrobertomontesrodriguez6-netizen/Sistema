@@ -1,0 +1,62 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    # Los usuarios se guardan en la base de datos y entran con su correo.
+    providers:
+        usuarios:
+            entity:
+                class: App\Entity\Usuario
+                property: email
+
+    # El admin también puede hacer todo lo que hace un usuario normal.
+    role_hierarchy:
+        ROLE_ADMIN: ROLE_USER
+
+    firewalls:
+        dev:
+            # Ensure dev tools and static assets are always allowed
+            pattern: ^/(_profiler(/|$)|(_wdt|assets|build|uploads)/)
+            security: false
+        main:
+            lazy: true
+            provider: usuarios
+
+            # El formulario de entrada está en la landing (/{_locale}).
+            form_login:
+                login_path: landing
+                check_path: login_check
+                default_target_path: auto_listado
+                username_parameter: email
+                password_parameter: password
+                enable_csrf: true
+
+            logout:
+                path: salir
+                target: landing
+                enable_csrf: true
+
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 2592000 # 30 días
+
+            # Bloquea durante un rato después de 5 intentos fallidos.
+            login_throttling:
+                max_attempts: 5
+
+    # Solo se aplica la primera regla que coincide.
+    # Sin sesión solo se ven la landing, el registro y la página "/".
+    access_control:
+        - { path: '^/(es|en|pt|zh|ja)/admin', roles: ROLE_ADMIN }
+        - { path: '^/(es|en|pt|zh|ja)/(autos|catalogo)', roles: ROLE_USER }
+
+when@test:
+    security:
+        password_hashers:
+            # Password hashers are resource-intensive by design to ensure security.
+            # In tests, it's safe to reduce their cost to improve performance.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon

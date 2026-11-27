@@ -1,0 +1,14 @@
+twig:
+    file_name_pattern: '*.twig'
+    globals:
+        # Selector de idioma: código => nombre en su propio idioma.
+        idiomas:
+            es: Español
+            en: English
+            pt: Português
+            zh: 中文
+            ja: 日本語
+
+when@test:
+    twig:
+        strict_variables: true

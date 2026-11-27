@@ -1,0 +1,91 @@
+{#- Ruta actual con sus parámetros: sirve para cambiar de idioma sin salir de la página. -#}
+{%- set ruta_actual = app.request.attributes.get('_route') -%}
+{%- set params_actuales = (app.request.attributes.get('_route_params') ?? {})|merge(app.request.query.all) -%}
+{%- macro url_idioma(codigo, ruta, params) -%}
+    {{ ruta and '_locale' in params|keys ? path(ruta, params|merge({_locale: codigo})) : path('landing', {_locale: codigo}) }}
+{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="{{ app.locale }}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
+        <title>{% block title %}{{ 'sitio.titulo'|trans }}{% endblock %} · AutoPlaza</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🚗</text></svg>">
+        {% for codigo in idiomas|keys %}
+            <link rel="alternate" hreflang="{{ codigo }}" href="{{ _self.url_idioma(codigo, ruta_actual, params_actuales) }}">
+        {% endfor %}
+
+        {# Aplica el tema guardado antes de pintar la página, para que no parpadee. #}
+        <script>
+            try {
+                const tema = localStorage.getItem('tema');
+                if (tema === 'claro' || tema === 'oscuro') document.documentElement.dataset.tema = tema;
+            } catch (e) {}
+        </script>
+
+        {% block stylesheets %}
+        {% endblock %}
+
+        {% block javascripts %}
+            {% block importmap %}{{ importmap('app') }}{% endblock %}
+        {% endblock %}
+
+        {% set frankenphp_hot_reload = app.request.server.get('FRANKENPHP_HOT_RELOAD') %}
+        {% if frankenphp_hot_reload %}
+        <meta name="frankenphp-hot-reload:url" content="{{ frankenphp_hot_reload }}">
+        <script src="https://cdn.jsdelivr.net/npm/idiomorph"></script>
+        <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
+        {% endif %}
+    </head>
+    <body>
+        <header class="cabecera">
+            <div class="contenedor cabecera__contenido">
+                <a class="logo" href="{{ app.user ? path('auto_listado') : path('landing') }}">Auto<span>Plaza</span></a>
+                <div class="cabecera__acciones">
+                    <nav class="menu" aria-label="{{ 'menu.principal'|trans }}">
+                        {% if app.user %}
+                            <a href="{{ path('auto_listado') }}" {% if ruta_actual == 'auto_listado' %}aria-current="page"{% endif %}>{{ 'menu.buscar'|trans }}</a>
+                            <a href="{{ path('catalogo') }}" {% if ruta_actual == 'catalogo' %}aria-current="page"{% endif %}>{{ 'menu.catalogo'|trans }}</a>
+                            {# El panel solo aparece para el admin. #}
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a class="menu__admin" href="{{ path('admin_inicio') }}" {% if ruta_actual starts with 'admin_' %}aria-current="page"{% endif %} title="{{ 'menu.panel'|trans }}">{{ 'menu.panel_corto'|trans }}</a>
+                            {% endif %}
+                        {% endif %}
+                    </nav>
+                    <nav class="idiomas" aria-label="{{ 'menu.idioma'|trans }}">
+                        {% for codigo, nombre in idiomas %}
+                            <a href="{{ _self.url_idioma(codigo, ruta_actual, params_actuales) }}"
+                               hreflang="{{ codigo }}" lang="{{ codigo }}" title="{{ nombre }}"
+                               {% if codigo == app.locale %}aria-current="page"{% endif %}>{{ codigo|upper }}</a>
+                        {% endfor %}
+                    </nav>
+                    <button type="button" class="tema" data-controller="tema" data-action="tema#alternar"
+                            aria-label="{{ 'tema.cambiar'|trans }}" title="{{ 'tema.cambiar'|trans }}">
+                        <span class="tema__icono" aria-hidden="true"></span>
+                    </button>
+                    {% if app.user %}
+                        <form class="sesion" method="post" action="{{ path('salir') }}">
+                            <span class="sesion__nombre" title="{{ app.user.email }}">{{ app.user.nombre }}</span>
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                            <button type="submit" class="sesion__salir">{{ 'menu.salir'|trans }}</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+
+        <main class="contenedor">
+            {% for tipo, mensajes in app.flashes(['exito', 'error']) %}
+                {% for mensaje in mensajes %}
+                    <p class="aviso aviso--{{ tipo }}" role="status">{{ mensaje|trans }}</p>
+                {% endfor %}
+            {% endfor %}
+            {% block body %}{% endblock %}
+        </main>
+
+        <footer class="pie">
+            <div class="contenedor">© {{ 'now'|date('Y') }} AutoPlaza · {{ 'sitio.pie'|trans }}</div>
+        </footer>
+    </body>
+</html>

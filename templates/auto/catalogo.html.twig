@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'catalogo.titulo'|trans }}{% endblock %}
+
+{% block body %}
+    <a class="enlace volver" href="{{ path('auto_listado') }}">{{ 'catalogo.volver'|trans }}</a>
+
+    <section class="portada">
+        <h1>{{ 'catalogo.titulo'|trans }}</h1>
+        <p>{{ 'catalogo.intro'|trans }}</p>
+    </section>
+
+    {% if secciones is empty %}
+        <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
+    {% else %}
+        {# Pestañas de marcas; dentro de cada marca, pestañas de modelos. Solo cambia el contenido, la página no se desplaza. #}
+        <div class="pestanas" data-controller="pestanas" data-pestanas-parametro-value="marca" data-pestanas-limpiar-value="modelo">
+            <div class="pestanas__marcas" role="tablist" aria-label="{{ 'catalogo.marcas'|trans }}">
+                {% for seccion in secciones %}
+                    {% set activa = seccion.clave == marca_activa %}
+                    <a href="{{ path('catalogo', {marca: seccion.clave}) }}" role="tab"
+                       id="pestana-{{ seccion.clave }}" aria-controls="panel-{{ seccion.clave }}"
+                       aria-selected="{{ activa ? 'true' : 'false' }}" tabindex="{{ activa ? 0 : -1 }}"
+                       data-pestanas-target="pestana" data-clave="{{ seccion.clave }}"
+                       data-action="click->pestanas#seleccionar keydown->pestanas#teclado">
+                        {{ seccion.nombre }} <span>{{ seccion.total }}</span>
+                    </a>
+                {% endfor %}
+            </div>
+
+            {% for seccion in secciones %}
+                {% set modelo_abierto = seccion.clave == marca_activa ? modelo_activo : seccion.modelos[0].clave %}
+                <section class="pestanas__panel" role="tabpanel" id="panel-{{ seccion.clave }}"
+                         aria-labelledby="pestana-{{ seccion.clave }}" data-pestanas-target="panel"
+                         {{ seccion.clave != marca_activa ? 'hidden' }}>
+                    <div class="modelos" data-controller="pestanas" data-pestanas-parametro-value="modelo">
+                        <div class="modelos__lista" role="tablist" aria-orientation="vertical"
+                             aria-label="{{ 'catalogo.modelos_de'|trans({marca: seccion.nombre}) }}">
+                            <h2 class="modelos__marca">{{ seccion.nombre }}</h2>
+                            {% for modelo in seccion.modelos %}
+                                {% set abierto = modelo.clave == modelo_abierto %}
+                                <a href="{{ path('catalogo', {marca: seccion.clave, modelo: modelo.clave}) }}" role="tab"
+                                   id="pestana-{{ seccion.clave }}-{{ modelo.clave }}"
+                                   aria-controls="panel-{{ seccion.clave }}-{{ modelo.clave }}"
+                                   aria-selected="{{ abierto ? 'true' : 'false' }}" tabindex="{{ abierto ? 0 : -1 }}"
+                                   data-pestanas-target="pestana" data-clave="{{ modelo.clave }}"
+                                   data-action="click->pestanas#seleccionar keydown->pestanas#teclado">
+                                    {{ modelo.nombre }}
+                                    <span>{{ 'catalogo.unidades'|trans({total: modelo.autos|length}) }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        {% for modelo in seccion.modelos %}
+                            <div class="modelos__panel" role="tabpanel" id="panel-{{ seccion.clave }}-{{ modelo.clave }}"
+                                 aria-labelledby="pestana-{{ seccion.clave }}-{{ modelo.clave }}" data-pestanas-target="panel"
+                                 {{ modelo.clave != modelo_abierto ? 'hidden' }}>
+                                {% for auto in modelo.autos %}
+                                    {% include 'auto/_ficha_catalogo.html.twig' %}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

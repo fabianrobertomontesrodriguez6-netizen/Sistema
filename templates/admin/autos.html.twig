@@ -1,0 +1,49 @@
+{% extends 'admin/_base.html.twig' %}
+
+{% block title %}{{ 'admin.menu.autos'|trans }}{% endblock %}
+
+{% block admin %}
+    <div class="admin__fila">
+        <h1>{{ 'admin.menu.autos'|trans }}</h1>
+        <a class="boton" href="{{ path('admin_auto_nuevo') }}">+ {{ 'admin.auto.nuevo'|trans }}</a>
+    </div>
+
+    {% if vehiculos is empty %}
+        <p class="vacio">{{ 'admin.auto.ninguno'|trans }}</p>
+    {% else %}
+        <div class="tabla-envoltura">
+            <table class="tabla">
+                <thead>
+                    <tr>
+                        <th>{{ 'admin.auto.auto'|trans }}</th>
+                        <th>{{ 'admin.auto.precio'|trans }}</th>
+                        <th>{{ 'auto.kilometraje'|trans }}</th>
+                        <th>{{ 'admin.auto.medios'|trans }}</th>
+                        <th><span class="oculto">{{ 'admin.acciones'|trans }}</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for vehiculo in vehiculos %}
+                        <tr>
+                            <td>
+                                <a class="enlace" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}">{{ vehiculo.nombre }}</a>
+                                <small>{{ vehiculo.slug }}</small>
+                            </td>
+                            <td>{% include 'auto/_precio.html.twig' with {precio: vehiculo.precio} only %}</td>
+                            <td>{{ vehiculo.kilometraje|numero }} km</td>
+                            <td>{{ vehiculo.medios|length }}</td>
+                            <td class="tabla__acciones">
+                                <a class="boton-pequeno" href="{{ path('auto_detalle', {slug: vehiculo.slug}) }}">{{ 'admin.ver'|trans }}</a>
+                                <a class="boton-pequeno" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}">{{ 'admin.editar'|trans }}</a>
+                                <form method="post" action="{{ path('admin_auto_borrar', {id: vehiculo.id}) }}" data-controller="confirmar" data-confirmar-mensaje-value="{{ 'admin.confirmar_borrar'|trans }}" data-action="submit->confirmar#preguntar">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('borrar-auto-' ~ vehiculo.id) }}">
+                                    <button type="submit" class="boton-pequeno boton-pequeno--peligro">{{ 'admin.borrar'|trans }}</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="admin">
+        <nav class="admin__menu" aria-label="{{ 'menu.panel'|trans }}">
+            <a href="{{ path('admin_inicio') }}" {% if ruta_actual == 'admin_inicio' %}aria-current="page"{% endif %}>{{ 'admin.menu.resumen'|trans }}</a>
+            <a href="{{ path('admin_autos') }}" {% if ruta_actual starts with 'admin_auto' %}aria-current="page"{% endif %}>{{ 'admin.menu.autos'|trans }}</a>
+            <a href="{{ path('admin_consultas') }}" {% if ruta_actual starts with 'admin_consulta' %}aria-current="page"{% endif %}>{{ 'admin.menu.consultas'|trans }}</a>
+            <a href="{{ path('admin_usuarios') }}" {% if ruta_actual == 'admin_usuarios' %}aria-current="page"{% endif %}>{{ 'admin.menu.usuarios'|trans }}</a>
+        </nav>
+        <div class="admin__contenido">
+            {% block admin %}{% endblock %}
+        </div>
+    </div>
+{% endblock %}

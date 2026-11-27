@@ -1,0 +1,9 @@
+framework:
+    default_locale: es
+    # Idiomas del sitio. Si se agrega uno, actualizar también el prefijo en config/routes.yaml
+    # y la lista "idiomas" en config/packages/twig.yaml.
+    enabled_locales: [es, en, pt, zh, ja]
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks: [es]
+        providers:

@@ -1,0 +1,10 @@
+{# Pinta una imagen, un video (mp4/webm) o un video de YouTube. Recibe "medio" y "auto". #}
+{% set alt = medio.alt.en(app.locale) ?: auto.nombre %}
+{% if medio.tipo.value == 'imagen' %}
+    <img src="{{ medio.url }}" alt="{{ alt }}" loading="lazy">
+{% elseif medio.tipo.value == 'youtube' %}
+    <iframe src="{{ medio.url }}" title="{{ alt }}" loading="lazy"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+{% else %}
+    <video src="{{ medio.url }}" controls preload="metadata" playsinline aria-label="{{ alt }}"></video>
+{% endif %}

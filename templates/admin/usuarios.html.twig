@@ -1,0 +1,29 @@
+{% extends 'admin/_base.html.twig' %}
+
+{% block title %}{{ 'admin.menu.usuarios'|trans }}{% endblock %}
+
+{% block admin %}
+    <h1>{{ 'admin.menu.usuarios'|trans }}</h1>
+    <div class="tabla-envoltura">
+        <table class="tabla">
+            <thead>
+                <tr>
+                    <th>{{ 'registro.nombre'|trans }}</th>
+                    <th>{{ 'registro.email'|trans }}</th>
+                    <th>{{ 'admin.usuario.rol'|trans }}</th>
+                    <th>{{ 'admin.usuario.alta'|trans }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                    <tr>
+                        <td>{{ usuario.nombre }}</td>
+                        <td>{{ usuario.email }}</td>
+                        <td>{{ (usuario.esAdmin ? 'admin.usuario.admin' : 'admin.usuario.cliente')|trans }}</td>
+                        <td>{{ usuario.creadoEn|date('d/m/Y') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

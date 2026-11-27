@@ -1,0 +1,24 @@
+{# Un auto dentro de la pestaña de su modelo en el catálogo. Recibe "auto". #}
+<article class="ficha-catalogo">
+    <div class="ficha-catalogo__foto">
+        {% if auto.portada %}
+            <img src="{{ auto.portada.url }}" alt="{{ auto.portada.alt.en(app.locale) ?: auto.nombre }}" loading="lazy">
+        {% else %}
+            <span class="sin-foto">{{ 'auto.sin_foto'|trans }}</span>
+        {% endif %}
+        {% if auto.tieneVideo %}<span class="etiqueta">▶ {{ 'auto.video'|trans }}</span>{% endif %}
+    </div>
+    <div class="ficha-catalogo__datos">
+        <h3>{{ auto.marca }} {{ auto.modelo }} <span>{{ auto.anio }}</span></h3>
+        <p class="precio precio--grande">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
+        <dl class="especificaciones">
+            <div><dt>{{ 'auto.kilometraje'|trans }}</dt><dd>{{ auto.kilometraje|numero }} km</dd></div>
+            <div><dt>{{ 'auto.transmision'|trans }}</dt><dd>{{ auto.transmision|trans({}, 'valores') }}</dd></div>
+            {% if auto.motor %}<div><dt>{{ 'auto.motor'|trans }}</dt><dd>{{ auto.motor }}</dd></div>{% endif %}
+            {% if auto.potencia %}<div><dt>{{ 'auto.potencia'|trans }}</dt><dd>{{ auto.potencia|numero }} hp</dd></div>{% endif %}
+            {% if auto.aceleracion %}<div><dt>{{ 'auto.aceleracion'|trans }}</dt><dd>{{ auto.aceleracion|numero }} s</dd></div>{% endif %}
+            {% if auto.velocidadMaxima %}<div><dt>{{ 'auto.velocidad_maxima'|trans }}</dt><dd>{{ auto.velocidadMaxima|numero }} km/h</dd></div>{% endif %}
+        </dl>
+        <a class="boton" href="{{ path('auto_detalle', {slug: auto.slug}) }}">{{ 'catalogo.ver_ficha'|trans }} →</a>
+    </div>
+</article>

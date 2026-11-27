@@ -1,0 +1,9 @@
+{# Correo al concesionario (en español: es para el equipo de ventas). #}
+<h2>Nueva consulta: {{ consulta.autoNombre }}</h2>
+<p>
+    <strong>{{ consulta.nombre }}</strong><br>
+    {{ consulta.email }}{% if consulta.telefono %} · {{ consulta.telefono }}{% endif %}<br>
+    Idioma de la web: {{ consulta.idioma|upper }} · {{ consulta.creadaEn|date('d/m/Y H:i') }}
+</p>
+<p>{{ consulta.mensaje|nl2br }}</p>
+<p style="color:#666">Responde a este correo para contestar directamente al cliente. La consulta también está en el panel de AutoPlaza.</p>

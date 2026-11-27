@@ -1,0 +1,87 @@
+{% extends 'admin/_base.html.twig' %}
+
+{% macro fila_medio(medio) %}
+    <fieldset class="medio" data-coleccion-target="elemento">
+        <legend>{{ 'admin.medio.titulo'|trans }}</legend>
+        <div class="medio__campos">
+            {{ form_row(medio.tipo) }}
+            {{ form_row(medio.archivo) }}
+            {{ form_row(medio.src) }}
+        </div>
+        <details class="medio__alt">
+            <summary>{{ 'admin.medio.alt'|trans }}</summary>
+            <div class="campos-idiomas">{{ form_widget(medio.alt) }}</div>
+        </details>
+        <button type="button" class="boton-pequeno boton-pequeno--peligro" data-action="coleccion#quitar">{{ 'admin.medio.quitar'|trans }}</button>
+    </fieldset>
+{% endmacro %}
+
+{% block title %}{{ vehiculo.id ? vehiculo.nombre : 'admin.auto.nuevo'|trans }}{% endblock %}
+
+{% block admin %}
+    <a class="enlace volver" href="{{ path('admin_autos') }}">← {{ 'admin.menu.autos'|trans }}</a>
+    <h1>{{ vehiculo.id ? vehiculo.nombre : 'admin.auto.nuevo'|trans }}</h1>
+
+    {{ form_start(form, {attr: {class: 'formulario formulario-auto', novalidate: 'novalidate'}}) }}
+        {% if not form.vars.valid %}
+            <div class="aviso aviso--error" role="alert">
+                {{ 'admin.auto.revisar'|trans }}
+                {{ form_errors(form) }}
+            </div>
+        {% endif %}
+
+        <fieldset>
+            <legend>{{ 'admin.auto.datos'|trans }}</legend>
+            <div class="rejilla-campos">
+                {{ form_row(form.marca) }}
+                {{ form_row(form.modelo) }}
+                {{ form_row(form.anio) }}
+                {{ form_row(form.precio) }}
+                {{ form_row(form.kilometraje) }}
+                {{ form_row(form.combustible) }}
+                {{ form_row(form.transmision) }}
+                {{ form_row(form.carroceria) }}
+                {{ form_row(form.slug) }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>{{ 'auto.motor_prestaciones'|trans }}</legend>
+            <div class="rejilla-campos">
+                {{ form_row(form.motor) }}
+                {{ form_row(form.potencia) }}
+                {{ form_row(form.torque) }}
+                {{ form_row(form.traccion) }}
+                {{ form_row(form.aceleracion) }}
+                {{ form_row(form.velocidadMaxima) }}
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>{{ 'admin.auto.descripcion'|trans }}</legend>
+            <p class="ayuda">{{ 'admin.auto.descripcion_ayuda'|trans }}</p>
+            {{ form_errors(form.descripcion) }}
+            <div class="campos-idiomas campos-idiomas--grandes">{{ form_widget(form.descripcion) }}</div>
+        </fieldset>
+
+        <fieldset data-controller="coleccion"
+                  data-coleccion-indice-value="{{ form.medios|length > 0 ? max(form.medios|keys) + 1 : 0 }}"
+                  data-coleccion-prototipo-value="{{ _self.fila_medio(form.medios.vars.prototype)|e('html_attr') }}">
+            <legend>{{ 'admin.auto.medios'|trans }}</legend>
+            <p class="ayuda">{{ 'admin.medio.ayuda'|trans }}</p>
+            {{ form_errors(form.medios) }}
+            <div class="medios" data-coleccion-target="lista">
+                {% for medio in form.medios %}
+                    {{ _self.fila_medio(medio) }}
+                {% endfor %}
+            </div>
+            {% do form.medios.setRendered() %}
+            <button type="button" class="boton boton--secundario" data-action="coleccion#agregar">+ {{ 'admin.medio.agregar'|trans }}</button>
+        </fieldset>
+
+        <div class="formulario__acciones">
+            <button type="submit" class="boton">{{ 'admin.guardar'|trans }}</button>
+            <a class="enlace" href="{{ path('admin_autos') }}">{{ 'admin.cancelar'|trans }}</a>
+        </div>
+    {{ form_end(form) }}
+{% endblock %}

@@ -1,0 +1,29 @@
+{# Una consulta en el panel. Recibe "consulta" y "acciones" (bool). #}
+<article class="consulta-item {{ consulta.leida ? 'consulta-item--leida' }}">
+    <header>
+        <strong>{{ consulta.nombre }}</strong>
+        <a class="enlace" href="mailto:{{ consulta.email }}">{{ consulta.email }}</a>
+        {% if consulta.telefono %}<a class="enlace" href="tel:{{ consulta.telefono|replace({' ': ''}) }}">{{ consulta.telefono }}</a>{% endif %}
+        <span class="consulta-item__fecha">{{ consulta.creadaEn|date('d/m/Y H:i') }} · {{ consulta.idioma|upper }}</span>
+    </header>
+    <p class="consulta-item__auto">
+        {% if consulta.vehiculo %}
+            <a class="enlace" href="{{ path('auto_detalle', {slug: consulta.vehiculo.slug}) }}">{{ consulta.autoNombre }}</a>
+        {% else %}
+            {{ consulta.autoNombre }} <em>({{ 'admin.consulta.auto_borrado'|trans }})</em>
+        {% endif %}
+    </p>
+    <p class="consulta-item__mensaje">{{ consulta.mensaje|nl2br }}</p>
+    {% if acciones ?? false %}
+        <footer>
+            <form method="post" action="{{ path('admin_consulta_leida', {id: consulta.id}) }}">
+                <input type="hidden" name="_token" value="{{ csrf_token('consulta-' ~ consulta.id) }}">
+                <button type="submit" class="boton-pequeno">{{ (consulta.leida ? 'admin.consulta.marcar_no_leida' : 'admin.consulta.marcar_leida')|trans }}</button>
+            </form>
+            <form method="post" action="{{ path('admin_consulta_borrar', {id: consulta.id}) }}" data-controller="confirmar" data-confirmar-mensaje-value="{{ 'admin.confirmar_borrar'|trans }}" data-action="submit->confirmar#preguntar">
+                <input type="hidden" name="_token" value="{{ csrf_token('consulta-' ~ consulta.id) }}">
+                <button type="submit" class="boton-pequeno boton-pequeno--peligro">{{ 'admin.borrar'|trans }}</button>
+            </form>
+        </footer>
+    {% endif %}
+</article>

@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'registro.titulo'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="panel-entrada panel-entrada--centrado">
+        <h1>{{ 'registro.titulo'|trans }}</h1>
+        <p class="panel-entrada__intro">{{ 'registro.intro'|trans }}</p>
+
+        {{ form_start(form, {attr: {class: 'formulario', novalidate: 'novalidate'}}) }}
+            {{ form_errors(form) }}
+            {{ form_row(form.nombre) }}
+            {{ form_row(form.email) }}
+            {{ form_row(form.plainPassword.first) }}
+            {{ form_row(form.plainPassword.second) }}
+            <button type="submit" class="boton boton--ancho">{{ 'registro.crear'|trans }}</button>
+        {{ form_end(form) }}
+
+        <p class="panel-entrada__pie">
+            {{ 'registro.ya_tengo'|trans }}
+            <a class="enlace" href="{{ path('landing') }}">{{ 'landing.entrar'|trans }}</a>
+        </p>
+    </section>
+{% endblock %}

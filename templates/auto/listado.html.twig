@@ -1,0 +1,70 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'listado.titulo'|trans }}{% endblock %}
+
+{% block body %}
+    <section class="portada">
+        <h1>{{ 'listado.encabezado'|trans }}</h1>
+        <p>{{ 'listado.total'|trans({total: total}) }}</p>
+    </section>
+
+    <form class="busqueda" method="get" action="{{ path('auto_listado') }}" role="search">
+        <div class="busqueda__barra">
+            <label class="oculto" for="q">{{ 'busqueda.etiqueta'|trans }}</label>
+            <input type="search" id="q" name="q" value="{{ filtros.q }}" list="sugerencias"
+                   placeholder="{{ 'busqueda.placeholder'|trans }}" autocomplete="off">
+            <datalist id="sugerencias">
+                {% for sugerencia in sugerencias %}<option value="{{ sugerencia }}">{% endfor %}
+            </datalist>
+            <button type="submit" class="boton">{{ 'busqueda.buscar'|trans }}</button>
+        </div>
+        <a class="boton-pequeno" href="{{ path('catalogo') }}">{{ 'busqueda.ver_catalogo'|trans }} →</a>
+
+        <div class="filtros">
+            <label>
+                {{ 'filtros.marca'|trans }}
+                <select name="marca">
+                    <option value="">{{ 'filtros.todas'|trans }}</option>
+                    {% for marca in marcas %}
+                        <option value="{{ marca }}" {{ filtros.marca == marca ? 'selected' }}>{{ marca }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                {{ 'filtros.carroceria'|trans }}
+                <select name="carroceria">
+                    <option value="">{{ 'filtros.todas'|trans }}</option>
+                    {% for carroceria in carrocerias %}
+                        <option value="{{ carroceria }}" {{ filtros.carroceria == carroceria ? 'selected' }}>{{ carroceria|trans({}, 'valores') }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                {{ 'filtros.orden'|trans }}
+                <select name="orden">
+                    {% for valor, etiqueta in ordenes %}
+                        <option value="{{ valor }}" {{ filtros.orden == valor ? 'selected' }}>{{ etiqueta|trans }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="boton boton--secundario">{{ 'filtros.filtrar'|trans }}</button>
+            {% if filtros.q or filtros.marca or filtros.carroceria %}
+                <a class="enlace" href="{{ path('auto_listado') }}">{{ 'filtros.quitar'|trans }}</a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if filtros.q %}
+        <p class="resultado">{{ 'busqueda.resultados'|trans({total: autos|length, texto: filtros.q}) }}</p>
+    {% endif %}
+
+    {% if autos is empty %}
+        <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
+    {% else %}
+        <ul class="grilla">
+            {% for auto in autos %}
+                {% include 'auto/_tarjeta.html.twig' %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

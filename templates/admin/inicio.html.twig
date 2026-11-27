@@ -1,0 +1,23 @@
+{% extends 'admin/_base.html.twig' %}
+
+{% block title %}{{ 'menu.panel'|trans }}{% endblock %}
+
+{% block admin %}
+    <h1>{{ 'menu.panel'|trans }}</h1>
+
+    <div class="cifras">
+        <a class="cifra" href="{{ path('admin_autos') }}"><span>{{ total_autos|numero }}</span>{{ 'admin.menu.autos'|trans }}</a>
+        <a class="cifra" href="{{ path('admin_consultas') }}"><span>{{ sin_leer|numero }}</span>{{ 'admin.consulta.sin_leer'|trans }}</a>
+        <a class="cifra" href="{{ path('admin_usuarios') }}"><span>{{ total_usuarios|numero }}</span>{{ 'admin.menu.usuarios'|trans }}</a>
+    </div>
+
+    <div class="admin__fila">
+        <h2>{{ 'admin.consulta.recientes'|trans }}</h2>
+        <a class="boton" href="{{ path('admin_auto_nuevo') }}">+ {{ 'admin.auto.nuevo'|trans }}</a>
+    </div>
+    {% for consulta in consultas %}
+        {% include 'admin/_consulta.html.twig' %}
+    {% else %}
+        <p class="vacio">{{ 'admin.consulta.ninguna'|trans }}</p>
+    {% endfor %}
+{% endblock %}

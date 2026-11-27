@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=../vendor/symfony/routing/Loader/schema/routing.schema.json
+
+# To list all registered routes, run the following command:
+#   bin/console debug:router
+
+# Todas las páginas llevan el idioma al inicio de la URL: /es, /en/autos/..., etc.
+controllers:
+    resource: routing.controllers
+    prefix: /{_locale}
+    requirements:
+        _locale: es|en|pt|zh|ja
+    trailing_slash_on_root: false
+
+# "/" redirige al idioma preferido del navegador (español si no coincide ninguno).
+inicio:
+    path: /
+    controller: App\Controller\InicioController
+    methods: [GET]

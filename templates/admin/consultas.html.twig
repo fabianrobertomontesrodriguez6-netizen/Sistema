@@ -1,0 +1,12 @@
+{% extends 'admin/_base.html.twig' %}
+
+{% block title %}{{ 'admin.menu.consultas'|trans }}{% endblock %}
+
+{% block admin %}
+    <h1>{{ 'admin.menu.consultas'|trans }}</h1>
+    {% for consulta in consultas %}
+        {% include 'admin/_consulta.html.twig' with {acciones: true} %}
+    {% else %}
+        <p class="vacio">{{ 'admin.consulta.ninguna'|trans }}</p>
+    {% endfor %}
+{% endblock %}

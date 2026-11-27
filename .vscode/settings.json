@@ -1,0 +1,7 @@
+{
+    "php.version": "8.4",
+    "php.files.exclude": ["**/var/cache/**"],
+    "php.problems.exclude": {
+        "**/var/cache/**": true
+    }
+}
