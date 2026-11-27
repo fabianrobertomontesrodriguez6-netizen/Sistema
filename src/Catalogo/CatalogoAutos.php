@@ -30,6 +30,7 @@ final class CatalogoAutos
         'precio_asc' => 'orden.precio_asc',
         'precio_desc' => 'orden.precio_desc',
         'km_asc' => 'orden.km_asc',
+        'anio_asc' => 'orden.anio_asc',
     ];
 
     public const EXTENSIONES_IMAGEN = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif', 'svg'];
@@ -78,29 +79,73 @@ final class CatalogoAutos
     }
 
     /**
-     * @param string|null $texto búsqueda libre: marca, modelo o año ("lamborghini", "huracan 2019")
+     * Busca, filtra y ordena (sin paginar).
      *
      * @return list<Auto>
      */
-    public function filtrar(?string $marca, ?string $carroceria, string $orden = 'recientes', ?string $texto = null): array
+    public function filtrar(Filtros $filtros): array
     {
-        $palabras = array_filter(explode(' ', self::normalizar((string) $texto)));
+        $palabras = array_filter(explode(' ', self::normalizar((string) $filtros->texto)));
 
         $autos = array_filter(
             $this->todos(),
-            static fn (Auto $auto): bool => (null === $marca || $auto->marca === $marca)
-                && (null === $carroceria || $auto->carroceria === $carroceria)
+            static fn (Auto $auto): bool => (null === $filtros->marca || $auto->marca === $filtros->marca)
+                && (null === $filtros->carroceria || $auto->carroceria === $filtros->carroceria)
+                && (null === $filtros->combustible || $auto->combustible === $filtros->combustible)
+                && (null === $filtros->transmision || $auto->transmision === $filtros->transmision)
+                && (null === $filtros->precioMin || $auto->precio >= $filtros->precioMin)
+                && (null === $filtros->precioMax || $auto->precio <= $filtros->precioMax)
+                && (null === $filtros->anioMin || $auto->anio >= $filtros->anioMin)
+                && (null === $filtros->anioMax || $auto->anio <= $filtros->anioMax)
                 && self::coincide($auto, $palabras),
         );
 
-        usort($autos, match ($orden) {
+        usort($autos, match ($filtros->orden) {
             'precio_asc' => static fn (Auto $a, Auto $b): int => $a->precio <=> $b->precio,
             'precio_desc' => static fn (Auto $a, Auto $b): int => $b->precio <=> $a->precio,
             'km_asc' => static fn (Auto $a, Auto $b): int => $a->kilometraje <=> $b->kilometraje,
-            default => static fn (Auto $a, Auto $b): int => $b->anio <=> $a->anio,
+            'anio_asc' => static fn (Auto $a, Auto $b): int => $a->anio <=> $b->anio,
+            default => static fn (Auto $a, Auto $b): int => [$b->anio, $a->marca, $a->modelo] <=> [$a->anio, $b->marca, $b->modelo],
         });
 
         return $autos;
+    }
+
+    /**
+     * Busca, filtra, ordena y devuelve solo la página pedida.
+     *
+     * @return Pagina<Auto>
+     */
+    public function buscar(Filtros $filtros): Pagina
+    {
+        return Pagina::de($this->filtrar($filtros), $filtros->pagina, Filtros::POR_PAGINA);
+    }
+
+    /**
+     * @param callable(Auto): string $campo
+     *
+     * @return list<string>
+     */
+    public function valores(callable $campo): array
+    {
+        return $this->valoresUnicos($campo);
+    }
+
+    /**
+     * Precio y año mínimos y máximos del inventario (para los campos de rango).
+     *
+     * @return array{precio: array{int, int}, anio: array{int, int}}
+     */
+    public function rangos(): array
+    {
+        $autos = $this->todos();
+        if ([] === $autos) {
+            return ['precio' => [0, 0], 'anio' => [0, 0]];
+        }
+        $precios = array_map(static fn (Auto $auto): int => $auto->precio, $autos);
+        $anios = array_map(static fn (Auto $auto): int => $auto->anio, $autos);
+
+        return ['precio' => [min($precios), max($precios)], 'anio' => [min($anios), max($anios)]];
     }
 
     /**
@@ -279,6 +324,7 @@ final class CatalogoAutos
             traccion: $this->textoOpcional($fila, 'traccion', $donde),
             aceleracion: $this->decimalOpcional($fila, 'aceleracion', $donde),
             velocidadMaxima: $this->enteroOpcional($fila, 'velocidad_maxima', $donde),
+            version: $this->textoOpcional($fila, 'version', $donde) ?? '',
         );
     }
 
@@ -296,24 +342,25 @@ final class CatalogoAutos
 
         $src = $this->texto($fila, 'src', $donde);
         $alt = $this->textoTraducido($fila, 'alt', $donde, obligatorio: false);
+        $credito = $this->textoOpcional($fila, 'credito', $donde);
 
         if (null !== $idYoutube = self::idYoutube($src)) {
             if (TipoMedio::Imagen === $tipo) {
                 throw new CatalogoInvalidoException("$donde: un enlace de YouTube debe tener \"tipo\": \"video\".");
             }
 
-            return new Medio(TipoMedio::YouTube, 'https://www.youtube-nocookie.com/embed/'.$idYoutube, $alt);
+            return new Medio(TipoMedio::YouTube, 'https://www.youtube-nocookie.com/embed/'.$idYoutube, $alt, $credito);
         }
 
         if (preg_match('#^https?://#i', $src)) {
-            return new Medio($tipo, $src, $alt);
+            return new Medio($tipo, $src, $alt, $credito);
         }
 
         if (str_starts_with($src, self::CARPETA_SUBIDAS)) {
-            return new Medio($tipo, $this->urlSubida($src, $tipo, $donde), $alt);
+            return new Medio($tipo, $this->urlSubida($src, $tipo, $donde), $alt, $credito);
         }
 
-        return new Medio($tipo, $this->urlLocal($src, $tipo, $donde), $alt);
+        return new Medio($tipo, $this->urlLocal($src, $tipo, $donde), $alt, $credito);
     }
 
     /**

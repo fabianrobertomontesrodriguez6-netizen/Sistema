@@ -6,7 +6,9 @@ namespace App\Tests\Catalogo;
 
 use App\Catalogo\CatalogoAutos;
 use App\Catalogo\CatalogoInvalidoException;
+use App\Catalogo\Filtros;
 use App\Catalogo\FuenteJson;
+use App\Catalogo\Pagina;
 use App\Catalogo\TipoMedio;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Asset\Package;
@@ -61,7 +63,7 @@ final class CatalogoAutosTest extends TestCase
 
         $slugs = array_map(
             static fn ($auto) => $auto->slug,
-            $catalogo->filtrar('Ford', null, 'precio_asc'),
+            $catalogo->filtrar(new Filtros(marca: 'Ford', orden: 'precio_asc')),
         );
 
         self::assertSame(['c', 'a'], $slugs);
@@ -129,11 +131,55 @@ final class CatalogoAutosTest extends TestCase
         ]);
         $slugs = static fn (array $autos): array => array_map(static fn ($auto) => $auto->slug, $autos);
 
-        self::assertEqualsCanonicalizing(['a', 'b'], $slugs($catalogo->filtrar(null, null, texto: 'lamborghini')));
-        self::assertSame(['a'], $slugs($catalogo->filtrar(null, null, texto: 'HURACAN')));
-        self::assertSame(['a'], $slugs($catalogo->filtrar(null, null, texto: 'lamborghini huracán 2020')));
-        self::assertSame([], $catalogo->filtrar(null, null, texto: 'ferrari'));
-        self::assertCount(3, $catalogo->filtrar(null, null, texto: '  '));
+        self::assertEqualsCanonicalizing(['a', 'b'], $slugs($catalogo->filtrar(new Filtros(texto: 'lamborghini'))));
+        self::assertSame(['a'], $slugs($catalogo->filtrar(new Filtros(texto: 'HURACAN'))));
+        self::assertSame(['a'], $slugs($catalogo->filtrar(new Filtros(texto: 'lamborghini huracán 2020'))));
+        self::assertSame([], $catalogo->filtrar(new Filtros(texto: 'ferrari')));
+        self::assertCount(3, $catalogo->filtrar(new Filtros(texto: '  ')));
+    }
+
+    public function testFiltrosDePrecioAnioCombustibleYTransmision(): void
+    {
+        $catalogo = $this->catalogo([
+            ['anio' => 2015] + $this->auto('a', precio: 10000),
+            ['anio' => 2020, 'combustible' => 'Eléctrico', 'transmision' => 'Automática'] + $this->auto('b', precio: 30000),
+            ['anio' => 2023] + $this->auto('c', precio: 50000),
+        ]);
+        $slugs = static fn (array $autos): array => array_map(static fn ($auto) => $auto->slug, $autos);
+
+        self::assertSame(['b', 'a'], $slugs($catalogo->filtrar(new Filtros(precioMax: 30000))));
+        self::assertSame(['c', 'b'], $slugs($catalogo->filtrar(new Filtros(precioMin: 20000))));
+        self::assertSame(['b'], $slugs($catalogo->filtrar(new Filtros(anioMin: 2016, anioMax: 2021))));
+        self::assertSame(['b'], $slugs($catalogo->filtrar(new Filtros(combustible: 'Eléctrico'))));
+        self::assertSame(['c', 'a'], $slugs($catalogo->filtrar(new Filtros(transmision: 'Manual'))));
+        self::assertSame(['a', 'b', 'c'], $slugs($catalogo->filtrar(new Filtros(orden: 'anio_asc'))));
+        self::assertSame(['precio' => [10000, 50000], 'anio' => [2015, 2023]], $catalogo->rangos());
+    }
+
+    public function testPaginacion(): void
+    {
+        $pagina = Pagina::de(range(1, 30), 2, 12);
+        self::assertSame(range(13, 24), $pagina->elementos);
+        self::assertSame(3, $pagina->paginas());
+        self::assertSame([13, 24], [$pagina->desde(), $pagina->hasta()]);
+
+        // Una página que no existe se ajusta a la última.
+        self::assertSame(3, Pagina::de(range(1, 30), 99, 12)->numero);
+        self::assertSame([25, 30], [Pagina::de(range(1, 30), 99, 12)->desde(), Pagina::de(range(1, 30), 99, 12)->hasta()]);
+
+        // Enlaces con huecos: 1 … 4 5 6 … 10
+        self::assertSame([1, null, 4, 5, 6, null, 10], Pagina::de(range(1, 100), 5, 10)->enlaces());
+        self::assertSame([1], Pagina::de([], 1, 12)->enlaces());
+    }
+
+    public function testVersionYCreditoDeLaFoto(): void
+    {
+        $catalogo = $this->catalogo([$this->auto('a', medios: [['tipo' => 'imagen', 'src' => 'autos/local.jpg', 'credito' => 'Foto: Ana · CC BY-SA 4.0']]) + ['version' => 'GT3 (992)']]);
+        $auto = $catalogo->buscarPorSlug('a');
+
+        self::assertSame('GT3 (992)', $auto->version);
+        self::assertSame('Ford Modelo GT3 (992)', $auto->titulo());
+        self::assertSame('Foto: Ana · CC BY-SA 4.0', $auto->medios[0]->credito);
     }
 
     public function testCatalogoSeccionadoPorMarca(): void

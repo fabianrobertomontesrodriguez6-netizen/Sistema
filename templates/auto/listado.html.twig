@@ -2,6 +2,13 @@
 
 {% block title %}{{ 'listado.titulo'|trans }}{% endblock %}
 
+{% macro opciones(valores, elegido, dominio) %}
+    <option value="">{{ 'filtros.todas'|trans }}</option>
+    {% for valor in valores %}
+        <option value="{{ valor }}" {{ elegido == valor ? 'selected' }}>{{ dominio ? valor|trans({}, dominio) : valor }}</option>
+    {% endfor %}
+{% endmacro %}
+
 {% block body %}
     <section class="portada">
         <h1>{{ 'listado.encabezado'|trans }}</h1>
@@ -11,7 +18,7 @@
     <form class="busqueda" method="get" action="{{ path('auto_listado') }}" role="search">
         <div class="busqueda__barra">
             <label class="oculto" for="q">{{ 'busqueda.etiqueta'|trans }}</label>
-            <input type="search" id="q" name="q" value="{{ filtros.q }}" list="sugerencias"
+            <input type="search" id="q" name="q" value="{{ filtros.texto }}" list="sugerencias"
                    placeholder="{{ 'busqueda.placeholder'|trans }}" autocomplete="off">
             <datalist id="sugerencias">
                 {% for sugerencia in sugerencias %}<option value="{{ sugerencia }}">{% endfor %}
@@ -23,21 +30,11 @@
         <div class="filtros">
             <label>
                 {{ 'filtros.marca'|trans }}
-                <select name="marca">
-                    <option value="">{{ 'filtros.todas'|trans }}</option>
-                    {% for marca in marcas %}
-                        <option value="{{ marca }}" {{ filtros.marca == marca ? 'selected' }}>{{ marca }}</option>
-                    {% endfor %}
-                </select>
+                <select name="marca">{{ _self.opciones(marcas, filtros.marca, null) }}</select>
             </label>
             <label>
                 {{ 'filtros.carroceria'|trans }}
-                <select name="carroceria">
-                    <option value="">{{ 'filtros.todas'|trans }}</option>
-                    {% for carroceria in carrocerias %}
-                        <option value="{{ carroceria }}" {{ filtros.carroceria == carroceria ? 'selected' }}>{{ carroceria|trans({}, 'valores') }}</option>
-                    {% endfor %}
-                </select>
+                <select name="carroceria">{{ _self.opciones(carrocerias, filtros.carroceria, 'valores') }}</select>
             </label>
             <label>
                 {{ 'filtros.orden'|trans }}
@@ -48,23 +45,75 @@
                 </select>
             </label>
             <button type="submit" class="boton boton--secundario">{{ 'filtros.filtrar'|trans }}</button>
-            {% if filtros.q or filtros.marca or filtros.carroceria %}
+            {% if filtros.activos %}
                 <a class="enlace" href="{{ path('auto_listado') }}">{{ 'filtros.quitar'|trans }}</a>
             {% endif %}
         </div>
+
+        <details class="mas-filtros" {{ filtros.avanzados ? 'open' }}>
+            <summary>{{ 'filtros.mas'|trans }}</summary>
+            <div class="filtros filtros--avanzados">
+                <label>
+                    {{ 'auto.combustible'|trans }}
+                    <select name="combustible">{{ _self.opciones(combustibles, filtros.combustible, 'valores') }}</select>
+                </label>
+                <label>
+                    {{ 'auto.transmision'|trans }}
+                    <select name="transmision">{{ _self.opciones(transmisiones, filtros.transmision, 'valores') }}</select>
+                </label>
+                <fieldset class="rango">
+                    <legend>{{ 'filtros.precio'|trans }}</legend>
+                    <label><span class="oculto">{{ 'filtros.desde'|trans }}</span>
+                        <input type="number" name="precio_min" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMin }}" placeholder="{{ 'filtros.desde'|trans }} {{ rangos.precio[0]|numero }}"></label>
+                    <span aria-hidden="true">–</span>
+                    <label><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
+                        <input type="number" name="precio_max" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMax }}" placeholder="{{ 'filtros.hasta'|trans }} {{ rangos.precio[1]|numero }}"></label>
+                </fieldset>
+                <fieldset class="rango">
+                    <legend>{{ 'auto.anio'|trans }}</legend>
+                    <label><span class="oculto">{{ 'filtros.desde'|trans }}</span>
+                        <input type="number" name="anio_min" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMin }}" placeholder="{{ rangos.anio[0] }}"></label>
+                    <span aria-hidden="true">–</span>
+                    <label><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
+                        <input type="number" name="anio_max" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMax }}" placeholder="{{ rangos.anio[1] }}"></label>
+                </fieldset>
+            </div>
+        </details>
     </form>
 
-    {% if filtros.q %}
-        <p class="resultado">{{ 'busqueda.resultados'|trans({total: autos|length, texto: filtros.q}) }}</p>
-    {% endif %}
-
-    {% if autos is empty %}
-        <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
-    {% else %}
+    {% if pagina.total > 0 %}
+        <p class="resultado">
+            {% if filtros.texto %}{{ 'busqueda.resultados'|trans({total: pagina.total, texto: filtros.texto}) }} {% endif %}
+            {{ 'paginacion.mostrando'|trans({desde: pagina.desde, hasta: pagina.hasta, total: pagina.total}) }}
+        </p>
         <ul class="grilla">
-            {% for auto in autos %}
+            {% for auto in pagina.elementos %}
                 {% include 'auto/_tarjeta.html.twig' %}
             {% endfor %}
         </ul>
+
+        {% if pagina.paginas > 1 %}
+            {% set params = app.request.query.all %}
+            <nav class="paginacion" aria-label="{{ 'paginacion.etiqueta'|trans }}">
+                {% if pagina.numero > 1 %}
+                    <a href="{{ path('auto_listado', params|merge({pagina: pagina.numero - 1})) }}" rel="prev">← {{ 'paginacion.anterior'|trans }}</a>
+                {% endif %}
+                {% for numero in pagina.enlaces %}
+                    {% if numero is null %}
+                        <span class="paginacion__hueco">…</span>
+                    {% elseif numero == pagina.numero %}
+                        <span aria-current="page">{{ numero }}</span>
+                    {% else %}
+                        <a href="{{ path('auto_listado', params|merge({pagina: numero})) }}">{{ numero }}</a>
+                    {% endif %}
+                {% endfor %}
+                {% if pagina.numero < pagina.paginas %}
+                    <a href="{{ path('auto_listado', params|merge({pagina: pagina.numero + 1})) }}" rel="next">{{ 'paginacion.siguiente'|trans }} →</a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    {% else %}
+        {% if filtros.texto %}<p class="resultado">{{ 'busqueda.resultados'|trans({total: 0, texto: filtros.texto}) }}</p>{% endif %}
+        <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
     {% endif %}
 {% endblock %}

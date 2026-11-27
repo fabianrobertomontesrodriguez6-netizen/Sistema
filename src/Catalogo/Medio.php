@@ -13,6 +13,8 @@ final readonly class Medio
         public TipoMedio $tipo,
         public string $url,
         public TextoTraducido $alt,
+        // Autor y licencia de la foto, por ejemplo "Foto: Ana Pérez · CC BY-SA 4.0 · Wikimedia Commons".
+        public ?string $credito = null,
     ) {
     }
 

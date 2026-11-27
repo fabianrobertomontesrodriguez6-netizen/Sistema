@@ -7,9 +7,11 @@
             <span class="sin-foto">{{ 'auto.sin_foto'|trans }}</span>
         {% endif %}
         {% if auto.tieneVideo %}<span class="etiqueta">▶ {{ 'auto.video'|trans }}</span>{% endif %}
+        {% if auto.portada and auto.portada.credito %}<p class="galeria__credito">{{ auto.portada.credito }}</p>{% endif %}
     </div>
     <div class="ficha-catalogo__datos">
         <h3>{{ auto.marca }} {{ auto.modelo }} <span>{{ auto.anio }}</span></h3>
+        {% if auto.version %}<p class="ficha__version">{{ auto.version }}</p>{% endif %}
         <p class="precio precio--grande">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
         <dl class="especificaciones">
             <div><dt>{{ 'auto.kilometraje'|trans }}</dt><dd>{{ auto.kilometraje|numero }} km</dd></div>

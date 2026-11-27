@@ -43,6 +43,10 @@ final class GestorMedios
             }
 
             $limpio = ['tipo' => $tipo, 'src' => $src];
+            $credito = trim((string) ($medio['credito'] ?? ''));
+            if ('' !== $credito) {
+                $limpio['credito'] = $credito;
+            }
             $alt = Vehiculo::limpiarTraducciones((array) ($medio['alt'] ?? []));
             if ([] !== $alt) {
                 $limpio['alt'] = $alt;

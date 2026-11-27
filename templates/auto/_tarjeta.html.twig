@@ -11,7 +11,7 @@
             {% if auto.tieneVideo %}<span class="etiqueta">▶ {{ 'auto.video'|trans }}</span>{% endif %}
         </div>
         <div class="tarjeta__info">
-            <h{{ nivel }} class="tarjeta__titulo">{{ auto.marca }} {{ auto.modelo }}</h{{ nivel }}>
+            <h{{ nivel }} class="tarjeta__titulo">{{ auto.marca }} {{ auto.modelo }}{% if auto.version %} <small>{{ auto.version }}</small>{% endif %}</h{{ nivel }}>
             <p class="datos">{{ auto.anio }} · {{ auto.kilometraje|numero }} km · {{ auto.transmision|trans({}, 'valores') }}</p>
             {% if auto.motor or auto.potencia %}
                 <p class="datos datos--motor">{{ auto.motor }}{% if auto.motor and auto.potencia %} · {% endif %}{% if auto.potencia %}{{ auto.potencia|numero }} hp{% endif %}</p>

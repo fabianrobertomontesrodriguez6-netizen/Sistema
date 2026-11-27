@@ -14,6 +14,7 @@
                     {% for medio in auto.medios %}
                         <div class="galeria__slide" data-galeria-target="slide" {{ not loop.first ? 'hidden' }}>
                             {% include 'auto/_medio.html.twig' %}
+                            {% if medio.credito %}<p class="galeria__credito">{{ medio.credito }}</p>{% endif %}
                         </div>
                     {% endfor %}
                 </div>
@@ -40,6 +41,7 @@
 
         <div class="ficha">
             <h1>{{ auto.marca }} {{ auto.modelo }}</h1>
+            {% if auto.version %}<p class="ficha__version">{{ auto.version }}</p>{% endif %}
             <p class="precio precio--grande">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
             <p>{{ auto.descripcion.en(app.locale) }}</p>
 

@@ -43,6 +43,11 @@ class Vehiculo
     #[Assert\Length(max: 80, maxMessage: 'campo.muy_largo')]
     private string $modelo = '';
 
+    /** Versión o generación: "xDrive40i (G05)", "STO"… (opcional). */
+    #[ORM\Column(length: 80, nullable: true)]
+    #[Assert\Length(max: 80, maxMessage: 'campo.muy_largo')]
+    private ?string $version = null;
+
     #[ORM\Column]
     #[Assert\NotNull(message: 'campo.obligatorio')]
     #[Assert\Range(min: 1900, max: 2100, notInRangeMessage: 'vehiculo.anio_invalido')]
@@ -136,6 +141,7 @@ class Vehiculo
         $vehiculo->slug = (string) $fila['slug'];
         $vehiculo->marca = (string) $fila['marca'];
         $vehiculo->modelo = (string) $fila['modelo'];
+        $vehiculo->version = isset($fila['version']) && '' !== $fila['version'] ? (string) $fila['version'] : null;
         $vehiculo->anio = (int) $fila['anio'];
         $vehiculo->precio = (int) $fila['precio'];
         $vehiculo->kilometraje = (int) $fila['kilometraje'];
@@ -165,6 +171,7 @@ class Vehiculo
             'slug' => $this->slug,
             'marca' => $this->marca,
             'modelo' => $this->modelo,
+            'version' => $this->version,
             'anio' => $this->anio,
             'precio' => $this->precio,
             'kilometraje' => $this->kilometraje,
@@ -192,6 +199,9 @@ class Vehiculo
 
     public function getModelo(): string { return $this->modelo; }
     public function setModelo(?string $modelo): static { $this->modelo = trim((string) $modelo); return $this; }
+
+    public function getVersion(): ?string { return $this->version; }
+    public function setVersion(?string $version): static { $this->version = '' === trim((string) $version) ? null : trim((string) $version); return $this; }
 
     public function getNombre(): string { return trim(\sprintf('%s %s %s', $this->marca, $this->modelo, $this->anio ?? '')); }
 

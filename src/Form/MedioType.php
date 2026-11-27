@@ -44,6 +44,12 @@ final class MedioType extends AbstractType
                 'empty_data' => '',
                 'help' => 'admin.medio.src_ayuda',
             ])
+            ->add('credito', TextType::class, [
+                'label' => 'admin.medio.credito',
+                'required' => false,
+                'empty_data' => '',
+                'help' => 'admin.medio.credito_ayuda',
+            ])
             ->add('alt', TraduccionesType::class, [
                 'label' => 'admin.medio.alt',
                 'required' => false,

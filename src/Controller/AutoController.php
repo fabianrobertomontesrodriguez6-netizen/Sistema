@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Catalogo\CatalogoAutos;
+use App\Catalogo\Filtros;
 use App\Entity\Consulta;
 use App\Entity\Usuario;
 use App\Form\ConsultaType;
@@ -30,25 +31,40 @@ final class AutoController extends AbstractController
     }
 
     /**
-     * "Busca tu modelo": todos los autos, con barra de búsqueda y filtros.
+     * "Busca tu modelo": todos los autos con búsqueda, filtros, orden y paginación.
      */
     #[Route('/autos', name: 'auto_listado', methods: ['GET'])]
     public function listado(Request $request): Response
     {
+        $q = $request->query;
+        $rangos = $this->catalogo->rangos();
+
         // Solo se aceptan valores que existen en el catálogo; cualquier otro se ignora.
-        $marca = $this->opcionValida($request->query->getString('marca'), $this->catalogo->marcas());
-        $carroceria = $this->opcionValida($request->query->getString('carroceria'), $this->catalogo->carrocerias());
-        $orden = $this->opcionValida($request->query->getString('orden'), array_keys(CatalogoAutos::ORDENES)) ?? 'recientes';
-        $busqueda = mb_substr(trim($request->query->getString('q')), 0, 100);
+        $filtros = new Filtros(
+            texto: '' === ($texto = mb_substr(trim($q->getString('q')), 0, 100)) ? null : $texto,
+            marca: $this->opcionValida($q->getString('marca'), $this->catalogo->marcas()),
+            carroceria: $this->opcionValida($q->getString('carroceria'), $this->catalogo->carrocerias()),
+            combustible: $this->opcionValida($q->getString('combustible'), $this->catalogo->valores(static fn ($auto) => $auto->combustible)),
+            transmision: $this->opcionValida($q->getString('transmision'), $this->catalogo->valores(static fn ($auto) => $auto->transmision)),
+            precioMin: $this->numero($q->getString('precio_min')),
+            precioMax: $this->numero($q->getString('precio_max')),
+            anioMin: $this->numero($q->getString('anio_min')),
+            anioMax: $this->numero($q->getString('anio_max')),
+            orden: $this->opcionValida($q->getString('orden'), array_keys(CatalogoAutos::ORDENES)) ?? 'recientes',
+            pagina: max(1, $this->numero($q->getString('pagina')) ?? 1),
+        );
 
         return $this->render('auto/listado.html.twig', [
-            'autos' => $this->catalogo->filtrar($marca, $carroceria, $orden, $busqueda),
+            'pagina' => $this->catalogo->buscar($filtros),
             'total' => \count($this->catalogo->todos()),
             'marcas' => $this->catalogo->marcas(),
             'carrocerias' => $this->catalogo->carrocerias(),
+            'combustibles' => $this->catalogo->valores(static fn ($auto) => $auto->combustible),
+            'transmisiones' => $this->catalogo->valores(static fn ($auto) => $auto->transmision),
+            'rangos' => $rangos,
             'sugerencias' => $this->catalogo->sugerencias(),
             'ordenes' => CatalogoAutos::ORDENES,
-            'filtros' => ['q' => $busqueda, 'marca' => $marca, 'carroceria' => $carroceria, 'orden' => $orden],
+            'filtros' => $filtros,
         ]);
     }
 
@@ -124,6 +140,16 @@ final class AutoController extends AbstractController
             'auto' => $auto,
             'form' => $form,
         ]);
+    }
+
+    /**
+     * Un entero positivo escrito en la URL ("45000", "45.000", "45,000"); cualquier otra cosa = null.
+     */
+    private function numero(string $valor): ?int
+    {
+        $limpio = str_replace(['.', ',', ' '], '', trim($valor));
+
+        return ctype_digit($limpio) && \strlen($limpio) <= 9 ? (int) $limpio : null;
     }
 
     /**

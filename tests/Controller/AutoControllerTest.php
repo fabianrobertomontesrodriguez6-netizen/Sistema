@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Controller;
 
 use App\Entity\Consulta;
+use App\Entity\Vehiculo;
 use App\Tests\Soporte\BaseDeDatosDePrueba;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -72,6 +73,53 @@ final class AutoControllerTest extends WebTestCase
 
         $pagina = $this->cliente->request('GET', '/es/autos?q=ford');
         self::assertCount(2, $pagina->filter('.tarjeta'));
+    }
+
+    public function testMasFiltrosYPaginacion(): void
+    {
+        // 8 autos de los tests: con 12 por página hay una sola página y no hay paginación.
+        $pagina = $this->cliente->request('GET', '/es/autos');
+        self::assertSelectorNotExists('.paginacion');
+        self::assertSelectorTextContains('.resultado', 'Mostrando 1–8 de 8.');
+
+        $pagina = $this->cliente->request('GET', '/es/autos?precio_min=50000&precio_max=100000&transmision=Automática');
+        self::assertSame(
+            ['BMW M4', 'Ford Expedition', 'Porsche Panamera'], // año desc; mismo año → por marca
+            $pagina->filter('.tarjeta__titulo')->each(static fn ($h) => $h->text()),
+        );
+        self::assertSelectorExists('details.mas-filtros[open]');
+
+        $pagina = $this->cliente->request('GET', '/es/autos?anio_min=2022&orden=precio_asc');
+        self::assertSame(['Ford Mustang GT', 'BMW M4'], $pagina->filter('.tarjeta__titulo')->each(static fn ($h) => $h->text()));
+
+        // Valores raros en la URL se ignoran.
+        $this->cliente->request('GET', '/es/autos?precio_min=abc&combustible=Plutonio&pagina=-3');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextContains('.resultado', 'de 8.');
+    }
+
+    public function testPaginacionConservaLosFiltros(): void
+    {
+        $em = $this->cliente->getContainer()->get(EntityManagerInterface::class);
+        for ($i = 1; $i <= 10; ++$i) {
+            $em->persist(Vehiculo::desdeFila([
+                'slug' => "fiat-panda-$i", 'marca' => 'Fiat', 'modelo' => 'Panda', 'anio' => 2000 + $i,
+                'precio' => 5000 + $i, 'kilometraje' => 1000, 'combustible' => 'Gasolina',
+                'transmision' => 'Manual', 'carroceria' => 'Hatchback', 'descripcion' => 'Panda.',
+            ]));
+        }
+        $em->flush();
+
+        $pagina = $this->cliente->request('GET', '/es/autos?orden=precio_asc');
+        self::assertCount(12, $pagina->filter('.tarjeta'));
+        self::assertSelectorTextContains('.resultado', 'Mostrando 1–12 de 18.');
+        $siguiente = $pagina->filter('.paginacion a[rel="next"]')->attr('href');
+        self::assertSame('/es/autos?orden=precio_asc&pagina=2', $siguiente);
+
+        $pagina = $this->cliente->request('GET', $siguiente);
+        self::assertCount(6, $pagina->filter('.tarjeta'));
+        self::assertSelectorTextContains('.paginacion [aria-current]', '2');
+        self::assertSame('McLaren 720S', $pagina->filter('.tarjeta__titulo')->last()->text(), 'Sigue ordenado por precio: el más caro al final.');
     }
 
     public function testFiltroPorMarca(): void

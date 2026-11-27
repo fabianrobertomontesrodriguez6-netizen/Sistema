@@ -13,8 +13,9 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
- * Deja la base de pruebas (var/test.db) limpia antes de cada test:
- * los 8 autos de data/autos.json, un admin y un cliente.
+ * Deja la base de pruebas limpia antes de cada test: los 8 autos de
+ * tests/Fixtures/autos.json (fijos, para que los tests no dependan del inventario real),
+ * un admin y un cliente.
  */
 trait BaseDeDatosDePrueba
 {
@@ -33,7 +34,7 @@ trait BaseDeDatosDePrueba
         $herramienta->dropSchema($metadatos);
         $herramienta->createSchema($metadatos);
 
-        $fuente = new FuenteJson($contenedor->getParameter('kernel.project_dir').'/data/autos.json');
+        $fuente = new FuenteJson($contenedor->getParameter('kernel.project_dir').'/tests/Fixtures/autos.json');
         foreach ($fuente->filas() as $fila) {
             $em->persist(Vehiculo::desdeFila($fila));
         }

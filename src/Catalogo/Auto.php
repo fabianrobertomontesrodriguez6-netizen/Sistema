@@ -28,7 +28,31 @@ final readonly class Auto
         public ?string $traccion = null,
         public ?float $aceleracion = null,
         public ?int $velocidadMaxima = null,
+        // Versión / generación: "xDrive40i (G05)", "STO"... ('' si no hay).
+        public string $version = '',
     ) {
+    }
+
+    /**
+     * Marca, modelo y versión sin el año: "BMW X5 xDrive40i (G05)".
+     */
+    public function titulo(): string
+    {
+        return trim(\sprintf('%s %s %s', $this->marca, $this->modelo, $this->version));
+    }
+
+    /**
+     * Primer video (para el aviso "Video" y el anuncio en el detalle).
+     */
+    public function video(): ?Medio
+    {
+        foreach ($this->medios as $medio) {
+            if (!$medio->esImagen()) {
+                return $medio;
+            }
+        }
+
+        return null;
     }
 
     public function tieneDatosMotor(): bool

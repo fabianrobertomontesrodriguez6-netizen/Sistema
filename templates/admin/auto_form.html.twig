@@ -7,6 +7,7 @@
             {{ form_row(medio.tipo) }}
             {{ form_row(medio.archivo) }}
             {{ form_row(medio.src) }}
+            {{ form_row(medio.credito) }}
         </div>
         <details class="medio__alt">
             <summary>{{ 'admin.medio.alt'|trans }}</summary>
@@ -35,6 +36,7 @@
             <div class="rejilla-campos">
                 {{ form_row(form.marca) }}
                 {{ form_row(form.modelo) }}
+                {{ form_row(form.version) }}
                 {{ form_row(form.anio) }}
                 {{ form_row(form.precio) }}
                 {{ form_row(form.kilometraje) }}

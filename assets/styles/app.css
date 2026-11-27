@@ -1382,3 +1382,127 @@ a.boton {
     }
 }
 
+/* ---------- Idea #9: más filtros y paginación ---------- */
+
+.mas-filtros {
+    margin-top: 1rem;
+}
+
+.mas-filtros summary {
+    width: fit-content;
+    font-weight: 600;
+    color: var(--acento);
+    cursor: pointer;
+}
+
+.filtros--avanzados {
+    margin: 1rem 0 0;
+    padding: 0;
+    border: 0;
+}
+
+.rango {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.rango legend {
+    padding: 0;
+    margin-bottom: 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+}
+
+.rango input {
+    width: 9.5rem;
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--texto);
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    border-radius: 6px;
+}
+
+.rango input:hover {
+    border-color: var(--acento);
+}
+
+.paginacion {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 2.5rem;
+}
+
+.paginacion a,
+.paginacion span {
+    min-width: 2.4rem;
+    padding: 0.45rem 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+.paginacion a {
+    color: var(--acento);
+    text-decoration: none;
+    border: 1px solid var(--borde);
+}
+
+.paginacion a:hover {
+    border-color: var(--acento);
+}
+
+.paginacion [aria-current] {
+    color: #fff;
+    background: var(--boton);
+}
+
+.paginacion__hueco {
+    color: var(--texto-suave);
+}
+
+/* ---------- Versión y créditos de las fotos ---------- */
+
+.tarjeta__titulo small {
+    font-family: var(--fuente-texto);
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+}
+
+.ficha__version {
+    margin: 0.2rem 0 0;
+    color: var(--texto-suave);
+}
+
+.galeria__slide,
+.ficha-catalogo__foto {
+    position: relative;
+}
+
+.galeria__credito {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.2rem 0.5rem;
+    overflow: hidden;
+    font-size: 0.7rem;
+    color: #e7edf7;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background: rgb(7 10 18 / 0.6);
+    border-top-left-radius: 6px;
+}
+

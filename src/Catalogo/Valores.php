@@ -11,8 +11,8 @@ namespace App\Catalogo;
  */
 final class Valores
 {
-    public const COMBUSTIBLES = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido'];
+    public const COMBUSTIBLES = ['Gasolina', 'Diésel', 'Eléctrico', 'Híbrido', 'Híbrido enchufable'];
     public const TRANSMISIONES = ['Manual', 'Automática'];
-    public const CARROCERIAS = ['Coupé', 'Sedán', 'SUV', 'Hatchback', 'Convertible', 'Pickup'];
+    public const CARROCERIAS = ['Coupé', 'Sedán', 'SUV', 'Hatchback', 'Convertible', 'Pickup', 'Familiar', 'Monovolumen', 'Furgoneta'];
     public const TRACCIONES = ['Trasera', 'Delantera', 'Integral', '4x4'];
 }
