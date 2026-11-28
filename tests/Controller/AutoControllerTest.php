@@ -58,8 +58,6 @@ final class AutoControllerTest extends WebTestCase
     {
         yield ['en', 'Find your model', 'Sedan'];
         yield ['pt', 'Busque seu modelo', 'Sedã'];
-        yield ['zh', '查找您的车型', '轿车'];
-        yield ['ja', 'モデルを探す', 'セダン'];
     }
 
     public function testBuscarPorMarcaMuestraTodosSusModelos(): void
@@ -228,7 +226,7 @@ final class AutoControllerTest extends WebTestCase
 
     public function testConsultaConErroresDevuelve422(): void
     {
-        $pagina = $this->cliente->request('GET', '/ja/autos/bmw-m4-2022');
+        $pagina = $this->cliente->request('GET', '/pt/autos/bmw-m4-2022');
 
         $this->cliente->submit($pagina->filter('#consulta form, form[name="consulta"]')->form([
             'consulta[email]' => 'no-es-un-correo',
@@ -236,8 +234,8 @@ final class AutoControllerTest extends WebTestCase
         ]));
 
         self::assertResponseStatusCodeSame(422);
-        self::assertSelectorTextContains('#consulta', '有効なメールアドレスを入力してください。');
-        self::assertSelectorTextContains('#consulta', 'この項目は必須です。');
+        self::assertSelectorTextContains('#consulta', 'Digite um e-mail válido.');
+        self::assertSelectorTextContains('#consulta', 'Este campo é obrigatório.');
         self::assertEmailCount(0);
     }
 

@@ -4,6 +4,9 @@
 
 {% block admin %}
     <h1>{{ 'admin.menu.consultas'|trans }}</h1>
+    {% if not traductor_disponible %}
+        <p class="aviso aviso--error" role="status">{{ 'admin.consulta.traductor_no_disponible'|trans }}</p>
+    {% endif %}
     {% for consulta in consultas %}
         {% include 'admin/_consulta.html.twig' with {acciones: true} %}
     {% else %}

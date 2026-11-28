@@ -57,6 +57,18 @@ class Consulta
     #[ORM\Column(length: 5)]
     private string $idioma = 'es';
 
+    /** Idioma en que está escrito el mensaje, según LibreTranslate (puede no coincidir con "idioma", el de la página). */
+    #[ORM\Column(length: 5, nullable: true)]
+    private ?string $idiomaMensaje = null;
+
+    /**
+     * Traducciones automáticas del mensaje, guardadas para no pedirlas otra vez: {idioma: texto}.
+     *
+     * @var array<string, string>
+     */
+    #[ORM\Column(type: Types::JSON, options: ['default' => '{}'])]
+    private array $traducciones = [];
+
     #[ORM\Column]
     private bool $leida = false;
 
@@ -96,7 +108,24 @@ class Consulta
     public function setTelefono(?string $telefono): static { $this->telefono = '' === trim((string) $telefono) ? null : trim((string) $telefono); return $this; }
 
     public function getMensaje(): string { return $this->mensaje; }
-    public function setMensaje(?string $mensaje): static { $this->mensaje = trim((string) $mensaje); return $this; }
+    public function setMensaje(?string $mensaje): static
+    {
+        $mensaje = trim((string) $mensaje);
+        if ($mensaje !== $this->mensaje) {  // las traducciones guardadas ya no valen
+            $this->traducciones = [];
+            $this->idiomaMensaje = null;
+        }
+        $this->mensaje = $mensaje;
+
+        return $this;
+    }
+
+    public function getIdiomaMensaje(): ?string { return $this->idiomaMensaje; }
+    public function setIdiomaMensaje(?string $idioma): static { $this->idiomaMensaje = $idioma; return $this; }
+
+    /** Traducción guardada del mensaje al idioma dado, o null si no hay (o si el mensaje ya está en ese idioma). */
+    public function getTraduccion(string $idioma): ?string { return $this->traducciones[$idioma] ?? null; }
+    public function setTraduccion(string $idioma, string $texto): static { $this->traducciones[$idioma] = $texto; return $this; }
 
     public function getIdioma(): string { return $this->idioma; }
     public function setIdioma(string $idioma): static { $this->idioma = $idioma; return $this; }

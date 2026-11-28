@@ -13,7 +13,16 @@
             {{ consulta.autoNombre }} <em>({{ 'admin.consulta.auto_borrado'|trans }})</em>
         {% endif %}
     </p>
-    <p class="consulta-item__mensaje">{{ consulta.mensaje|nl2br }}</p>
+    {% set traduccion = consulta.traduccion(app.request.locale) %}
+    {% if traduccion %}
+        <p class="consulta-item__mensaje" lang="{{ app.request.locale }}">{{ traduccion|nl2br }}</p>
+        <details class="consulta-item__original">
+            <summary>{{ 'admin.consulta.traducida'|trans({idioma: (consulta.idiomaMensaje ?? consulta.idioma)|nombre_idioma}) }} · {{ 'admin.consulta.ver_original'|trans }}</summary>
+            <p class="consulta-item__mensaje" lang="{{ consulta.idiomaMensaje ?? consulta.idioma }}">{{ consulta.mensaje|nl2br }}</p>
+        </details>
+    {% else %}
+        <p class="consulta-item__mensaje">{{ consulta.mensaje|nl2br }}</p>
+    {% endif %}
     {% if acciones ?? false %}
         <footer>
             <form method="post" action="{{ path('admin_consulta_leida', {id: consulta.id}) }}">

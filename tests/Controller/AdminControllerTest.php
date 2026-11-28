@@ -7,6 +7,7 @@ namespace App\Tests\Controller;
 use App\Entity\Consulta;
 use App\Entity\Vehiculo;
 use App\Tests\Soporte\BaseDeDatosDePrueba;
+use App\Tests\Soporte\LibreTranslateFalso;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -164,6 +165,43 @@ final class AdminControllerTest extends WebTestCase
         self::assertResponseRedirects('/es/admin/consultas');
         $this->cliente->followRedirect();
         self::assertSelectorExists('.consulta-item--leida');
+    }
+
+    public function testConsultasSeTraducenAlIdiomaDelPanelUnaSolaVez(): void
+    {
+        LibreTranslateFalso::$peticiones = [];
+        $vehiculo = $this->em->getRepository(Vehiculo::class)->findOneBy(['slug' => 'bmw-m4-2022']);
+        $this->em->persist((new Consulta())->setVehiculo($vehiculo)->setNombre('João')->setEmail('joao@ejemplo.com')->setMensaje('Olá, ainda está disponível?')->setIdioma('es'));
+        $this->em->flush();
+
+        $this->cliente->request('GET', '/es/admin/consultas');
+        self::assertSelectorTextContains('.consulta-item__mensaje', '[es] Olá, ainda está disponível?');
+        self::assertSelectorTextContains('.consulta-item__original summary', 'Traducido automáticamente del portugués');
+        self::assertSelectorTextContains('.consulta-item__original', 'Olá, ainda está disponível?');
+        self::assertSelectorNotExists('.aviso--error');
+
+        // Guardada: la segunda vez no se vuelve a pedir.
+        $this->cliente->request('GET', '/es/admin/consultas');
+        self::assertCount(1, LibreTranslateFalso::$peticiones);
+        self::assertSame(['q' => 'Olá, ainda está disponível?', 'source' => 'auto', 'target' => 'es', 'format' => 'text'], LibreTranslateFalso::$peticiones[0]);
+
+        // Panel en portugués: el mensaje ya está en ese idioma y se muestra tal cual.
+        $this->cliente->request('GET', '/pt/admin/consultas');
+        self::assertSelectorTextSame('.consulta-item__mensaje', 'Olá, ainda está disponível?');
+        self::assertSelectorNotExists('.consulta-item__original');
+        self::assertCount(1, LibreTranslateFalso::$peticiones);
+    }
+
+    public function testSiElTraductorNoRespondeSeVeElOriginalYUnAviso(): void
+    {
+        $vehiculo = $this->em->getRepository(Vehiculo::class)->findOneBy(['slug' => 'bmw-m4-2022']);
+        $this->em->persist((new Consulta())->setVehiculo($vehiculo)->setNombre('X')->setEmail('x@ejemplo.com')->setMensaje('FALLA hello'));
+        $this->em->flush();
+
+        $this->cliente->request('GET', '/en/admin/consultas');
+        self::assertResponseIsSuccessful();
+        self::assertSelectorTextSame('.consulta-item__mensaje', 'FALLA hello');
+        self::assertSelectorTextContains('.aviso--error', 'LibreTranslate');
     }
 
     private function fotoTemporal(): UploadedFile

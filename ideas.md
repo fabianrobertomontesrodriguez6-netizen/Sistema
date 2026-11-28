@@ -11,6 +11,7 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 **Estado:** ✅ Hecha (2026-11-27)
 
 - **Aplicada:** colores con `light-dark()` en `app.css`, botón ☾/☀ (`assets/controllers/tema_controller.js`), cabecera y pie con degradado azul → negro. Contraste revisado (todo ≥ 4.5:1).
+- **Cambio (2026-11-28):** la paleta pasa al rojo del logo: rojo → blanco en modo claro y rojo → negro en modo oscuro (pedido por chat).
 
 - Rediseño minimalista: menos bordes y sombras, más espacio en blanco y jerarquía tipográfica clara.
 - Paleta basada en una escala de azul a negro, aplicada en los dos modos:
@@ -22,6 +23,8 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 
 ## #2 — Idiomas: español, inglés, portugués, chino y japonés
 **Estado:** ✅ Hecha (2026-11-27)
+
+- **Cambio (2026-11-28):** se quitan el chino y el japonés por pedido; quedan es, en y pt.
 
 - **Aplicada:** rutas `/{_locale}/...`, `/` redirige según el navegador, `translations/messages+intl-icu.*.yaml` y `valores.*.yaml`, textos de los autos por idioma en `autos.json`, números con el filtro `numero`.
 
@@ -46,7 +49,9 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 - Fuentes de respaldo para chino y japonés (por ejemplo Noto Sans SC o JP) si se aplica la idea #2.
 
 ## #4 — Medios reales
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Hecha (2026-11-27)
+
+- **Aplicada** (commit `1e7d703`, junto con la #9): 140 autos (20 por marca, 7 marcas) con fotos de Wikimedia Commons en `assets/images/autos/<marca>/`, con autor y licencia en cada foto, y anuncios oficiales de YouTube en 78 autos. Ya no hay fotos de Unsplash ni el video de MDN. Datos por marca en `data/marcas/*.json`, combinados en `data/autos.json` con `data/combinar_marcas.py`. **Importante:** después de cambiar `data/autos.json` hay que ejecutar `php bin/console app:importar-autos --reemplazar` (hasta el 2026-11-28 la base seguía con los 8 autos de antes).
 
 - Reemplazar las fotos de Unsplash y el video de ejemplo del Mustang (un placeholder de MDN) por fotos y videos reales de los autos.
 
@@ -65,9 +70,10 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 - Requiere la idea #8 (login). Conviene hacerlo después de la #6 (base de datos).
 
 ## #6 — Migrar a base de datos
-**Estado:** 🚧 En curso (casi hecha, 2026-11-27)
+**Estado:** ✅ Hecha con SQLite (2026-11-27); PostgreSQL aplazado (2026-11-28)
 
-- **Hecho junto con #5/#7/#8:** SQLite con Doctrine (`var/data.db`), entidades `Vehiculo`, `Usuario` y `Consulta`, migración y comando `app:importar-autos`. **Falta:** pasar a PostgreSQL si se quiere (cambiar `DATABASE_URL` e instalar la extensión `pdo_pgsql`).
+- **Hecho junto con #5/#7/#8:** SQLite con Doctrine (`var/data.db`), entidades `Vehiculo`, `Usuario` y `Consulta`, migración y comando `app:importar-autos`.
+- **Decisión (2026-11-28):** nos quedamos con SQLite, que basta para el volumen actual. PostgreSQL (o MariaDB) se elegirá cuando se sepa dónde se publica la web. Para cambiar: instalar `php8.4-pgsql` (o `php8.4-mysql`), crear la base, poner `DATABASE_URL` en `.env.local`, generar una migración nueva (la actual es SQL de SQLite), importar los autos y copiar los usuarios y las consultas.
 
 - Pasar de `data/autos.json` a PostgreSQL con Doctrine (ya instalado; `Entity/` y `migrations/` están vacíos).
 - Importar los autos actuales con una migración o un comando.
@@ -88,12 +94,17 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 - Configurar `security.yaml` con usuarios y login para proteger el panel de administración (#5).
 
 ## #9 — Más filtros y paginación
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Hecha (2026-11-27)
+
+- **Aplicada** (commit `1e7d703`): en "Busca tu modelo", filtros de combustible, transmisión, rango de precio y de año y orden "más antiguos" (`Catalogo/Filtros.php`); paginación de 12 que conserva los filtros (`Catalogo/Pagina.php`).
 
 - Filtros por rango de precio, año, combustible y transmisión.
 - Paginación del listado.
 
 ## #10 — Repositorio git
-**Estado:** ⏳ Pendiente
+**Estado:** ✅ Hecha (2026-11-27)
+
+- **Aplicada:** repositorio creado; primer commit `262e557`.
 
 - Inicializar git (`git init`) y hacer el primer commit. Conviene hacerlo antes de los cambios grandes. El `.gitignore` ya existe.
+

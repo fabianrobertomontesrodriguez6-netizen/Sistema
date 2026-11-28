@@ -1,5 +1,6 @@
 /* =========================================================
-   AutoPlaza: diseño minimalista con escala azul → negro.
+   AutoPlaza: diseño minimalista con el rojo del logo (#e31e24): de rojo a
+   blanco en el modo claro y de rojo a negro en el modo oscuro.
    Modo claro y oscuro con light-dark(): sigue al sistema, salvo que el
    usuario elija uno con el botón (html[data-tema="claro" | "oscuro"]).
    Tipografía: Michroma (logo y títulos) y Saira (texto), en assets/fonts/.
@@ -49,35 +50,47 @@
 :root {
     color-scheme: light dark;
 
-    /* Escala azul → negro */
-    --azul-300: #8fb0f0;
-    --azul-400: #5b8def;
-    --azul-500: #2f6be6;
-    --azul-600: #1d55c9;
-    --azul-700: #1a44a0;
-    --azul-800: #142f6e;
-    --azul-900: #0c1a3d;
-    --negro-900: #070a12;
+    /* Escala roja (el 500 es el rojo del logo) */
+    --rojo-300: #ff9a9d;
+    --rojo-400: #f4565b;
+    --rojo-500: #e31e24;
+    --rojo-600: #c3171d;
+    --rojo-700: #9a1217;
+    --rojo-800: #650c0f;
+    --rojo-900: #2e0607;
+    --negro-900: #0a0606;
     --negro: #000;
 
     /* light-dark(modo claro, modo oscuro) */
-    --fondo: light-dark(#f6f8fc, #05070d);
-    --superficie: light-dark(#ffffff, #0b1120);
-    --superficie-2: light-dark(#eef2f9, #101a30);
-    --texto: light-dark(#0a1020, #e7edf7);
-    --texto-suave: light-dark(#4b5870, #93a2bd);
-    --borde: light-dark(#dde3ee, #1a2540);
-    --acento: light-dark(var(--azul-600), var(--azul-400));
-    --boton: light-dark(var(--azul-600), var(--azul-500));
-    --boton-hover: light-dark(var(--azul-700), var(--azul-600));
-    --foco: light-dark(var(--azul-500), var(--azul-300));
-    --error: light-dark(#b42318, #ff8a80);
-    --error-fondo: light-dark(#fdecea, #2a1215);
+    --fondo: light-dark(#fcf9f9, #070505);
+    --superficie: light-dark(#ffffff, #120c0c);
+    --superficie-2: light-dark(#f7eeee, #1c1212);
+    --texto: light-dark(#1c1414, #f3eaea);
+    --texto-suave: light-dark(#5e5050, #b3a3a3);
+    --borde: light-dark(#eadcdc, #2c1c1c);
+    --acento: light-dark(var(--rojo-600), var(--rojo-400));
+    --boton: var(--rojo-600);
+    --boton-hover: var(--rojo-700);
+    --foco: light-dark(var(--rojo-500), var(--rojo-300));
+    /* Error en un tono vino/naranja para que no se confunda con el rojo de la marca */
+    --error: light-dark(#8a1c0c, #ffb59e);
+    --error-fondo: light-dark(#fff0e8, #2a140c);
     --exito: light-dark(#106b3c, #6fdc9f);
     --exito-fondo: light-dark(#e7f6ee, #0d2419);
 
-    /* Cabecera y pie: el degradado azul → negro, igual en los dos modos */
-    --degradado: linear-gradient(110deg, var(--azul-800) 0%, var(--azul-900) 45%, var(--negro) 100%);
+    /* Cabecera: rojo a la izquierda (donde va el logo) → blanco (claro) o negro (oscuro).
+       Las paradas se cuentan desde el borde del contenedor, así el logo siempre queda sobre el rojo. */
+    --inicio-contenedor: max(1rem, 50% - 600px);
+    --degradado: linear-gradient(100deg,
+        var(--rojo-600) 0,
+        var(--rojo-500) calc(var(--inicio-contenedor) + 230px),
+        light-dark(#f9d9da, var(--rojo-800)) calc(var(--inicio-contenedor) + 400px),
+        light-dark(#ffffff, var(--negro-900)) calc(var(--inicio-contenedor) + 580px),
+        light-dark(#ffffff, var(--negro)) 100%);
+    /* Textos de la cabecera que caen sobre la parte blanca (claro) o negra (oscuro) */
+    --cabecera-texto: light-dark(var(--texto), #ffffff);
+    --cabecera-suave: light-dark(#5e5050, #d9c4c4);
+    --cabecera-linea: light-dark(rgb(28 20 20 / 0.18), rgb(255 255 255 / 0.28));
 
     --fuente-titulos: "Michroma", "Saira", system-ui, sans-serif;
     --fuente-texto: "Saira", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -91,17 +104,6 @@
 
 :root[data-tema="oscuro"] {
     color-scheme: dark;
-}
-
-/* Chino y japonés: Michroma y Saira no tienen esos caracteres; se usan las fuentes del sistema. */
-:root:lang(zh) {
-    --fuente-titulos: "Michroma", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
-    --fuente-texto: "Saira", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", system-ui, sans-serif;
-}
-
-:root:lang(ja) {
-    --fuente-titulos: "Michroma", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", sans-serif;
-    --fuente-texto: "Saira", "Hiragino Sans", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
 }
 
 /* ---------- Base ---------- */
@@ -154,7 +156,7 @@ main.contenedor {
 
 .cabecera {
     background: var(--degradado);
-    color: #fff;
+    color: var(--cabecera-texto);
 }
 
 .cabecera__contenido {
@@ -172,20 +174,37 @@ main.contenedor {
 }
 
 .logo {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding-block: 0.5rem;
     color: #fff;
-    font-family: var(--fuente-titulos);
-    font-size: 1.15rem;
-    letter-spacing: 0.06em;
     text-decoration: none;
+}
+
+/* El logo va en la esquina, sobre el texto AUTOPLAZA */
+.logo__imagen {
+    display: block;
+    width: auto;
+    height: 32px;
+    filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+}
+
+.logo__texto {
+    font-family: var(--fuente-titulos);
+    font-size: 1.05rem;
+    line-height: 1;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
-.logo span {
-    color: var(--azul-300);
+.logo__texto span {
+    color: rgb(255 255 255 / 0.78);
 }
 
 .menu a {
-    color: #c9d4ea;
+    color: var(--cabecera-suave);
     font-weight: 500;
     letter-spacing: 0.03em;
     text-decoration: none;
@@ -198,18 +217,19 @@ main.contenedor {
 
 .menu a:hover,
 .menu a[aria-current] {
-    color: #fff;
+    color: var(--cabecera-texto);
 }
 
 .menu a[aria-current] {
     text-decoration: underline;
-    text-decoration-color: var(--azul-300);
+    text-decoration-color: var(--rojo-500);
+    text-decoration-thickness: 2px;
     text-underline-offset: 6px;
 }
 
 .menu__admin {
     padding: 0.1rem 0.6rem;
-    border: 1px solid rgb(255 255 255 / 0.3);
+    border: 1px solid var(--cabecera-linea);
     border-radius: 999px;
 }
 
@@ -219,13 +239,13 @@ main.contenedor {
     gap: 0.6rem;
     margin: 0;
     padding-left: 1rem;
-    border-left: 1px solid rgb(255 255 255 / 0.2);
+    border-left: 1px solid var(--cabecera-linea);
 }
 
 .sesion__nombre {
     max-width: 12ch;
     overflow: hidden;
-    color: #c9d4ea;
+    color: var(--cabecera-suave);
     font-size: 0.9rem;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -235,15 +255,15 @@ main.contenedor {
     padding: 0.25rem 0.75rem;
     font: inherit;
     font-size: 0.85rem;
-    color: #fff;
+    color: var(--cabecera-texto);
     background: transparent;
-    border: 1px solid rgb(255 255 255 / 0.3);
+    border: 1px solid var(--cabecera-linea);
     border-radius: 6px;
     cursor: pointer;
 }
 
 .sesion__salir:hover {
-    border-color: #fff;
+    border-color: var(--rojo-500);
 }
 
 .idiomas {
@@ -253,7 +273,7 @@ main.contenedor {
 
 .idiomas a {
     padding: 0.15rem 0.4rem;
-    color: #9fb0d0;
+    color: var(--cabecera-suave);
     font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -262,12 +282,12 @@ main.contenedor {
 }
 
 .idiomas a:hover {
-    color: #fff;
+    color: var(--cabecera-texto);
 }
 
 .idiomas a[aria-current] {
     color: #fff;
-    background: rgb(255 255 255 / 0.12);
+    background: var(--rojo-600);
 }
 
 .tema {
@@ -276,15 +296,15 @@ main.contenedor {
     width: 34px;
     height: 34px;
     padding: 0;
-    color: #fff;
+    color: var(--cabecera-texto);
     background: transparent;
-    border: 1px solid rgb(255 255 255 / 0.25);
+    border: 1px solid var(--cabecera-linea);
     border-radius: 50%;
     cursor: pointer;
 }
 
 .tema:hover {
-    border-color: rgb(255 255 255 / 0.6);
+    border-color: var(--rojo-500);
 }
 
 /* Muestra el modo al que se cambiará: luna en modo claro, sol en modo oscuro. */
@@ -299,8 +319,10 @@ main.contenedor {
 }
 
 .pie {
-    background: var(--degradado);
-    color: #9fb0d0;
+    background: var(--superficie);
+    border-top: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--rojo-500), light-dark(#ffffff, var(--negro))) 1;
+    color: var(--texto-suave);
     padding-block: 1.5rem;
     font-size: 0.9rem;
     letter-spacing: 0.02em;
@@ -442,7 +464,7 @@ main.contenedor {
     font-weight: 600;
     letter-spacing: 0.05em;
     color: #fff;
-    background: rgb(7 10 18 / 0.75);
+    background: rgb(10 6 6 / 0.75);
     border-radius: 999px;
 }
 
@@ -538,7 +560,7 @@ main.contenedor {
     overflow: hidden;
     color: #fff;
     font-size: 1.4rem;
-    background: var(--azul-900);
+    background: var(--negro-900);
     border: 2px solid transparent;
     border-radius: 6px;
     cursor: pointer;
@@ -613,9 +635,19 @@ main.contenedor {
         gap: 0.75rem;
     }
 
-    .landing {
-        grid-template-columns: 1fr;
+    /* Los controles van siempre en una segunda fila, sobre blanco/negro; el rojo queda arriba, con el logo. */
+    .cabecera__acciones {
+        width: 100%;
     }
+
+    .cabecera {
+        background: linear-gradient(180deg,
+            var(--rojo-600) 0,
+            var(--rojo-500) 64px,
+            light-dark(#f9d9da, var(--rojo-800)) 92px,
+            light-dark(#ffffff, var(--negro-900)) 116px);
+    }
+
 }
 
 /* ---------- Utilidades ---------- */
@@ -793,6 +825,13 @@ a.boton {
     gap: 3rem;
     align-items: center;
     padding-block: 1rem 2.5rem;
+}
+
+/* Va después de la regla general: si estuviera antes (como antes), esta la anularía. */
+@media (max-width: 900px) {
+    .landing {
+        grid-template-columns: 1fr;
+    }
 }
 
 .landing__antetitulo {
@@ -1240,6 +1279,23 @@ a.boton {
     color: var(--texto-suave);
 }
 
+/* Mensaje traducido: el original queda plegado debajo. */
+.consulta-item__original {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.consulta-item__original summary {
+    cursor: pointer;
+    color: var(--texto-suave);
+}
+
+.consulta-item__original .consulta-item__mensaje {
+    margin-top: 0.3rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid var(--borde);
+}
+
 .consulta-item footer {
     display: flex;
     gap: 0.5rem;
@@ -1499,10 +1555,10 @@ a.boton {
     padding: 0.2rem 0.5rem;
     overflow: hidden;
     font-size: 0.7rem;
-    color: #e7edf7;
+    color: #f3eaea;
     white-space: nowrap;
     text-overflow: ellipsis;
-    background: rgb(7 10 18 / 0.6);
+    background: rgb(10 6 6 / 0.6);
     border-top-left-radius: 6px;
 }
 

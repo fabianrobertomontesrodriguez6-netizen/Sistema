@@ -8,8 +8,19 @@ framework:
     #esi: true
     #fragments: true
 
+    http_client:
+        scoped_clients:
+            # Traductor local de los mensajes de las consultas (ver App\Servicio\TraductorConsultas).
+            libretranslate.client:
+                base_uri: '%env(LIBRETRANSLATE_URL)%'
+                timeout: 5
+                max_duration: 30
+
 when@test:
     framework:
         test: true
         session:
             storage_factory_id: session.storage.factory.mock_file
+        # Los tests no llaman a LibreTranslate: responde App\Tests\Soporte\LibreTranslateFalso.
+        http_client:
+            mock_response_factory: App\Tests\Soporte\LibreTranslateFalso

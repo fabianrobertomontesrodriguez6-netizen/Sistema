@@ -15,6 +15,9 @@
         <h2>{{ 'admin.consulta.recientes'|trans }}</h2>
         <a class="boton" href="{{ path('admin_auto_nuevo') }}">+ {{ 'admin.auto.nuevo'|trans }}</a>
     </div>
+    {% if not traductor_disponible %}
+        <p class="aviso aviso--error" role="status">{{ 'admin.consulta.traductor_no_disponible'|trans }}</p>
+    {% endif %}
     {% for consulta in consultas %}
         {% include 'admin/_consulta.html.twig' %}
     {% else %}

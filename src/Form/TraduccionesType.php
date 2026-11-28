@@ -13,7 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Un campo por idioma ({es, en, pt, zh, ja}). El español puede ser obligatorio.
+ * Un campo por idioma ({es, en, pt}). El español puede ser obligatorio.
  */
 final class TraduccionesType extends AbstractType
 {

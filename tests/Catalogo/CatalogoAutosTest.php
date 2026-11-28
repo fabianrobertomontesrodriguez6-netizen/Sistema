@@ -98,7 +98,7 @@ final class CatalogoAutosTest extends TestCase
         $leido = $this->catalogo([$auto])->buscarPorSlug('a');
 
         self::assertSame('Hello', $leido->descripcion->en('en'));
-        self::assertSame('Hola', $leido->descripcion->en('ja'));
+        self::assertSame('Hola', $leido->descripcion->en('pt'));
         self::assertSame('Solo español', $leido->medios[0]->alt->en('pt'));
     }
 

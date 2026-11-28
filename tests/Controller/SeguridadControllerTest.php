@@ -20,8 +20,12 @@ final class SeguridadControllerTest extends WebTestCase
     {
         $cliente = static::createClient();
 
+        $cliente->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'pt-BR,pt;q=0.9,en;q=0.8']);
+        self::assertResponseRedirects('/pt');
+
+        // El chino y el japonés ya no existen: se usa el siguiente idioma que acepta el navegador.
         $cliente->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'ja-JP,ja;q=0.9,en;q=0.8']);
-        self::assertResponseRedirects('/ja');
+        self::assertResponseRedirects('/en');
 
         $cliente->request('GET', '/', server: ['HTTP_ACCEPT_LANGUAGE' => 'de-DE']);
         self::assertResponseRedirects('/es');

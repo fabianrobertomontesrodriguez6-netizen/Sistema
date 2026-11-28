@@ -6,8 +6,6 @@ twig:
             es: Español
             en: English
             pt: Português
-            zh: 中文
-            ja: 日本語
 
 when@test:
     twig:

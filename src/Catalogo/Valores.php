@@ -7,7 +7,7 @@ namespace App\Catalogo;
 /**
  * Valores que ofrece el panel para combustible, transmisión, carrocería y tracción.
  * Se guardan en español y se traducen con translations/valores.*.yaml:
- * si se agrega uno aquí, añadirlo también en los 5 archivos.
+ * si se agrega uno aquí, añadirlo también en los 3 archivos.
  */
 final class Valores
 {

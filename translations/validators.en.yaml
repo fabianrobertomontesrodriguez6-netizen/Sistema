@@ -1,4 +1,4 @@
-# Mensajes de validación de formularios (sin parámetros). Mismas claves en los 5 idiomas.
+# Mensajes de validación de formularios (sin parámetros). Mismas claves en los 3 idiomas.
 campo.obligatorio: "This field is required."
 campo.email_invalido: "Enter a valid email address."
 campo.muy_largo: "The text is too long."

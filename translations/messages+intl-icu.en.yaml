@@ -1,4 +1,4 @@
-# Textos de la interfaz (formato ICU). Mantener las mismas claves en los 5 idiomas.
+# Textos de la interfaz (formato ICU). Mantener las mismas claves en los 3 idiomas.
 sitio.titulo: "Car dealership"
 sitio.pie: "Car dealership"
 menu.principal: "Main menu"
@@ -109,6 +109,9 @@ admin.consulta.auto_borrado: "car deleted"
 admin.consulta.marcar_leida: "Mark as read"
 admin.consulta.marcar_no_leida: "Mark as unread"
 admin.consulta.borrada: "Inquiry deleted."
+admin.consulta.traducida: "Automatically translated from {idioma}"
+admin.consulta.ver_original: "see the original"
+admin.consulta.traductor_no_disponible: "The messages could not be translated: the translator (LibreTranslate) is not responding. They are shown in their original language."
 admin.auto.nuevo: "New car"
 admin.auto.ninguno: "No cars yet. Create one or import data/autos.json."
 admin.auto.auto: "Car"

@@ -47,8 +47,8 @@ security:
     # Solo se aplica la primera regla que coincide.
     # Sin sesión solo se ven la landing, el registro y la página "/".
     access_control:
-        - { path: '^/(es|en|pt|zh|ja)/admin', roles: ROLE_ADMIN }
-        - { path: '^/(es|en|pt|zh|ja)/(autos|catalogo)', roles: ROLE_USER }
+        - { path: '^/(es|en|pt)/admin', roles: ROLE_ADMIN }
+        - { path: '^/(es|en|pt)/(autos|catalogo)', roles: ROLE_USER }
 
 when@test:
     security:

@@ -13,6 +13,7 @@ use App\Repository\ConsultaRepository;
 use App\Repository\UsuarioRepository;
 use App\Repository\VehiculoRepository;
 use App\Servicio\GestorMedios;
+use App\Servicio\TraductorConsultas;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
@@ -32,17 +33,21 @@ final class AdminController extends AbstractController
         private readonly EntityManagerInterface $em,
         private readonly VehiculoRepository $vehiculos,
         private readonly ConsultaRepository $consultas,
+        private readonly TraductorConsultas $traductor,
     ) {
     }
 
     #[Route('', name: 'admin_inicio', methods: ['GET'])]
-    public function inicio(UsuarioRepository $usuarios): Response
+    public function inicio(UsuarioRepository $usuarios, Request $request): Response
     {
+        $consultas = $this->consultas->recientes(5);
+
         return $this->render('admin/inicio.html.twig', [
             'total_autos' => $this->vehiculos->count([]),
             'total_usuarios' => $usuarios->count([]),
             'sin_leer' => $this->consultas->contarSinLeer(),
-            'consultas' => $this->consultas->recientes(5),
+            'consultas' => $consultas,
+            'traductor_disponible' => $this->traductor->traducir($consultas, $request->getLocale()),
         ]);
     }
 
@@ -116,9 +121,15 @@ final class AdminController extends AbstractController
     // ---------- Consultas ----------
 
     #[Route('/consultas', name: 'admin_consultas', methods: ['GET'])]
-    public function consultas(): Response
+    public function consultas(Request $request): Response
     {
-        return $this->render('admin/consultas.html.twig', ['consultas' => $this->consultas->recientes()]);
+        // Los mensajes se muestran traducidos al idioma del panel (y el original debajo).
+        $consultas = $this->consultas->recientes();
+
+        return $this->render('admin/consultas.html.twig', [
+            'consultas' => $consultas,
+            'traductor_disponible' => $this->traductor->traducir($consultas, $request->getLocale()),
+        ]);
     }
 
     #[Route('/consultas/{id}/leida', name: 'admin_consulta_leida', requirements: ['id' => '\d+'], methods: ['POST'])]

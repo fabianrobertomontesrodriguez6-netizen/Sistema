@@ -1,9 +1,9 @@
 """Une data/marcas/*.json (un archivo por marca) en data/autos.json, con descripciones y textos
-alternativos generados en 5 idiomas. Los autos que ya estaban en data/autos.json conservan su descripción.
+alternativos generados en 3 idiomas (es, en, pt). Los autos que ya estaban en data/autos.json conservan su descripción.
 Uso: python3 data/combinar_marcas.py .   (desde la raíz del proyecto)"""
 import json, sys, os, re
 raiz = sys.argv[1]
-L = ['es', 'en', 'pt', 'zh', 'ja']
+L = ['es', 'en', 'pt']
 
 def leer_valores(l):
     d = {}
@@ -28,10 +28,9 @@ def descripcion(a, l):
     if m:  # eléctrico puro: "motor eléctrico con batería de 93 kWh"
         kwh = m.group(1)
         motor = {'es': f'motor eléctrico con batería de {kwh} kWh', 'en': f'electric motor with a {kwh} kWh battery',
-                 'pt': f'motor elétrico com bateria de {kwh} kWh', 'zh': f'电动机（{kwh} kWh 电池）', 'ja': f'電動モーター（{kwh} kWh バッテリー）'}[l]
+                 'pt': f'motor elétrico com bateria de {kwh} kWh'}[l]
     else:
-        motor = {'es': f"motor {a['motor']}", 'en': f"{a['motor']} engine", 'pt': f"motor {a['motor']}",
-                 'zh': f"{a['motor']} 发动机", 'ja': f"{a['motor']} エンジン"}[l]
+        motor = {'es': f"motor {a['motor']}", 'en': f"{a['motor']} engine", 'pt': f"motor {a['motor']}"}[l]
     nombre = ' '.join(p for p in [a['marca'], a['modelo'], a.get('version') or ''] if p).strip()
     ac, vm = a.get('aceleracion'), a.get('velocidad_maxima')
     carroceria_en = t('carroceria') if t('carroceria').isupper() else t('carroceria').lower()  # "SUV" se queda en mayúsculas
@@ -43,30 +42,24 @@ def descripcion(a, l):
         s = f"{a['anio']} {nombre} {carroceria_en}: {motor}, {num(a['potencia'], l)} hp and {num(a['torque'], l)} Nm, {t('transmision').lower()} transmission and {t('traccion').lower()}."
         if ac and vm: s += f" 0–100 km/h in {dec(ac, l)} s and a top speed of {num(vm, l)} km/h."
         elif vm: s += f" Top speed: {num(vm, l)} km/h."
-    elif l == 'pt':
+    else:
         s = f"{t('carroceria')} {nombre} de {a['anio']}: {motor}, {num(a['potencia'], l)} cv e {num(a['torque'], l)} Nm, transmissão {t('transmision').lower()} e tração {t('traccion').lower()}."
         if ac and vm: s += f" Faz de 0 a 100 km/h em {dec(ac, l)} s e chega a {num(vm, l)} km/h."
         elif vm: s += f" Velocidade máxima: {num(vm, l)} km/h."
-    elif l == 'zh':
-        s = f"{a['anio']}年 {nombre}（{t('carroceria')}）。搭载{motor}，最大功率 {num(a['potencia'], l)} 马力，峰值扭矩 {num(a['torque'], l)} 牛·米，{t('transmision')}变速箱，{t('traccion')}。"
-        if ac and vm: s += f"0–100 公里/小时加速 {dec(ac, l)} 秒，最高车速 {num(vm, l)} 公里/小时。"
-        elif vm: s += f"最高车速 {num(vm, l)} 公里/小时。"
-    else:
-        s = f"{a['anio']}年式 {nombre}（{t('carroceria')}）。{motor}、最高出力 {num(a['potencia'], l)} hp、最大トルク {num(a['torque'], l)} Nm、{t('transmision')}トランスミッション、{t('traccion')}。"
-        if ac and vm: s += f"0–100km/h加速 {dec(ac, l)} 秒、最高速度 {num(vm, l)} km/h。"
-        elif vm: s += f"最高速度 {num(vm, l)} km/h。"
     return s
 
 def alt(a, l):
     n = f"{a['marca']} {a['modelo']} {a['anio']}"
-    return {'es': f'{n}, vista exterior', 'en': f'{n}, exterior view', 'pt': f'{n}, vista externa', 'zh': f'{n} 外观', 'ja': f'{n} の外観'}[l]
+    return {'es': f'{n}, vista exterior', 'en': f'{n}, exterior view', 'pt': f'{n}, vista externa'}[l]
 
 def alt_video(a, l):
-    p = {'es': 'Anuncio oficial', 'en': 'Official ad', 'pt': 'Anúncio oficial', 'zh': '官方广告', 'ja': '公式広告'}[l]
-    sep = '：' if l in ('zh', 'ja') else ': '
-    return f"{p}{sep}{a.get('video_titulo') or a['marca'] + ' ' + a['modelo']}"
+    p = {'es': 'Anuncio oficial', 'en': 'Official ad', 'pt': 'Anúncio oficial'}[l]
+    return f"{p}: {a.get('video_titulo') or a['marca'] + ' ' + a['modelo']}"
 
-originales = {a['slug']: a for a in json.load(open(f'{raiz}/data/autos.json', encoding='utf-8'))['autos']} if os.path.exists(f'{raiz}/data/autos.json') else {}
+# Los 8 autos del principio, escritos a mano: conservan su descripción y su potencia.
+A_MANO = {'bmw-m4-2022', 'chevrolet-camaro-ss-2020', 'fiat-500-2019', 'ford-expedition-2021', 'ford-mustang-gt-2022',
+          'lamborghini-huracan-2019', 'mclaren-720s-2020', 'porsche-panamera-2021'}
+originales = {a['slug']: a for a in json.load(open(f'{raiz}/data/autos.json', encoding='utf-8'))['autos'] if a['slug'] in A_MANO} if os.path.exists(f'{raiz}/data/autos.json') else {}
 CAMPOS = ['slug', 'marca', 'modelo', 'version', 'anio', 'precio', 'kilometraje', 'combustible', 'transmision', 'carroceria',
           'motor', 'potencia', 'torque', 'traccion', 'aceleracion', 'velocidad_maxima']
 autos, problemas = [], []
@@ -94,7 +87,7 @@ for archivo in sorted(os.listdir(f'{raiz}/data/marcas')):
         autos.append(n)
 slugs = [a['slug'] for a in autos]
 assert len(slugs) == len(set(slugs)), 'slugs repetidos'
-faltan = set(originales) - set(slugs)
+faltan = A_MANO - set(slugs)
 if faltan: problemas.append(f'autos originales que ya no están: {sorted(faltan)}')
 json.dump({'autos': autos}, open(f'{raiz}/data/autos.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
 open(f'{raiz}/data/autos.json', 'a').write('\n')

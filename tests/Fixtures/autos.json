@@ -19,9 +19,7 @@
             "descripcion": {
                 "es": "V8 de 5.0 litros, escape deportivo y asientos de cuero. Un solo dueño y mantenimientos al día.",
                 "en": "V8 5.0-liter engine, sport exhaust and leather seats. One owner, fully up-to-date maintenance.",
-                "pt": "Motor V8 de 5.0 litros, escapamento esportivo e bancos de couro. Único dono e manutenções em dia.",
-                "zh": "5.0升V8发动机，运动排气系统，真皮座椅。一手车主，保养记录齐全。",
-                "ja": "5.0リッターV8エンジン、スポーツエキゾースト、レザーシート。ワンオーナー、整備記録完備。"
+                "pt": "Motor V8 de 5.0 litros, escapamento esportivo e bancos de couro. Único dono e manutenções em dia."
             },
             "medios": [
                 {
@@ -30,9 +28,7 @@
                     "alt": {
                         "es": "Ford Mustang GT negro, vista frontal",
                         "en": "Black Ford Mustang GT, front view",
-                        "pt": "Ford Mustang GT preto, vista frontal",
-                        "zh": "黑色福特野马GT，正面视图",
-                        "ja": "黒のフォード・マスタングGT、フロントビュー"
+                        "pt": "Ford Mustang GT preto, vista frontal"
                     }
                 },
                 {
@@ -41,9 +37,7 @@
                     "alt": {
                         "es": "Video de ejemplo (reemplazar por el video real del auto)",
                         "en": "Sample video (replace with the car's real video)",
-                        "pt": "Vídeo de exemplo (substituir pelo vídeo real do carro)",
-                        "zh": "示例视频（请替换为该车的真实视频）",
-                        "ja": "サンプル動画（実車の動画に差し替えてください）"
+                        "pt": "Vídeo de exemplo (substituir pelo vídeo real do carro)"
                     }
                 }
             ]
@@ -67,9 +61,7 @@
             "descripcion": {
                 "es": "Sedán deportivo de lujo con techo panorámico, sistema de sonido premium y asistente de carril.",
                 "en": "Luxury sports sedan with panoramic roof, premium sound system and lane assist.",
-                "pt": "Sedã esportivo de luxo com teto panorâmico, sistema de som premium e assistente de faixa.",
-                "zh": "豪华运动轿车，配备全景天窗、高级音响系统和车道保持辅助。",
-                "ja": "パノラマルーフ、プレミアムサウンドシステム、レーンアシストを備えたラグジュアリースポーツセダン。"
+                "pt": "Sedã esportivo de luxo com teto panorâmico, sistema de som premium e assistente de faixa."
             },
             "medios": [
                 {
@@ -78,9 +70,7 @@
                     "alt": {
                         "es": "Porsche Panamera negro en carretera, vista trasera",
                         "en": "Black Porsche Panamera on the road, rear view",
-                        "pt": "Porsche Panamera preto na estrada, vista traseira",
-                        "zh": "行驶在路上的黑色保时捷Panamera，后视图",
-                        "ja": "道路を走る黒のポルシェ・パナメーラ、リアビュー"
+                        "pt": "Porsche Panamera preto na estrada, vista traseira"
                     }
                 }
             ]
@@ -104,9 +94,7 @@
             "descripcion": {
                 "es": "Motor V8 de 6.2 litros, rines de 20 pulgadas y pantalla táctil con Apple CarPlay y Android Auto.",
                 "en": "6.2-liter V8 engine, 20-inch wheels and touchscreen with Apple CarPlay and Android Auto.",
-                "pt": "Motor V8 de 6.2 litros, rodas de 20 polegadas e tela sensível ao toque com Apple CarPlay e Android Auto.",
-                "zh": "6.2升V8发动机，20英寸轮毂，触控屏支持Apple CarPlay和Android Auto。",
-                "ja": "6.2リッターV8エンジン、20インチホイール、Apple CarPlay／Android Auto対応タッチスクリーン。"
+                "pt": "Motor V8 de 6.2 litros, rodas de 20 polegadas e tela sensível ao toque com Apple CarPlay e Android Auto."
             },
             "medios": [
                 {
@@ -115,9 +103,7 @@
                     "alt": {
                         "es": "Chevrolet Camaro azul en el desierto",
                         "en": "Blue Chevrolet Camaro in the desert",
-                        "pt": "Chevrolet Camaro azul no deserto",
-                        "zh": "沙漠中的蓝色雪佛兰科迈罗",
-                        "ja": "砂漠に佇む青のシボレー・カマロ"
+                        "pt": "Chevrolet Camaro azul no deserto"
                     }
                 }
             ]
@@ -141,9 +127,7 @@
             "descripcion": {
                 "es": "SUV de tres filas para 8 pasajeros, tracción 4x4 y gancho de remolque de fábrica.",
                 "en": "Three-row SUV for 8 passengers, 4x4 drive and factory tow hitch.",
-                "pt": "SUV de três fileiras para 8 passageiros, tração 4x4 e engate de reboque de fábrica.",
-                "zh": "三排座SUV，可乘坐8人，四轮驱动，原厂拖车钩。",
-                "ja": "8人乗り3列シートSUV、4WD、純正トレーラーヒッチ付き。"
+                "pt": "SUV de três fileiras para 8 passageiros, tração 4x4 e engate de reboque de fábrica."
             },
             "medios": [
                 {
@@ -152,9 +136,7 @@
                     "alt": {
                         "es": "Ford Expedition blanca frente a formaciones rocosas",
                         "en": "White Ford Expedition in front of rock formations",
-                        "pt": "Ford Expedition branca diante de formações rochosas",
-                        "zh": "岩石地貌前的白色福特征服者",
-                        "ja": "岩山を背にした白のフォード・エクスペディション"
+                        "pt": "Ford Expedition branca diante de formações rochosas"
                     }
                 }
             ]
@@ -178,9 +160,7 @@
             "descripcion": {
                 "es": "Compacto ideal para ciudad, muy económico en consumo y fácil de estacionar.",
                 "en": "Compact car ideal for the city, very fuel-efficient and easy to park.",
-                "pt": "Compacto ideal para a cidade, muito econômico e fácil de estacionar.",
-                "zh": "城市代步理想小车，非常省油，停车方便。",
-                "ja": "街乗りに最適なコンパクトカー。燃費が良く、駐車も簡単です。"
+                "pt": "Compacto ideal para a cidade, muito econômico e fácil de estacionar."
             },
             "medios": [
                 {
@@ -189,9 +169,7 @@
                     "alt": {
                         "es": "Fiat 500 celeste estacionado, vista lateral",
                         "en": "Light blue Fiat 500 parked, side view",
-                        "pt": "Fiat 500 azul-claro estacionado, vista lateral",
-                        "zh": "停放的浅蓝色菲亚特500，侧视图",
-                        "ja": "駐車中の水色のフィアット500、サイドビュー"
+                        "pt": "Fiat 500 azul-claro estacionado, vista lateral"
                     }
                 }
             ]
@@ -215,9 +193,7 @@
             "descripcion": {
                 "es": "Seis cilindros biturbo de 503 hp, frenos carbono-cerámicos y paquete de fibra de carbono.",
                 "en": "503 hp twin-turbo six-cylinder, carbon-ceramic brakes and carbon fiber package.",
-                "pt": "Seis cilindros biturbo de 503 cv, freios de carbono-cerâmica e pacote de fibra de carbono.",
-                "zh": "503马力双涡轮增压直列六缸发动机，碳陶瓷刹车，碳纤维套件。",
-                "ja": "503馬力のツインターボ6気筒、カーボンセラミックブレーキ、カーボンファイバーパッケージ。"
+                "pt": "Seis cilindros biturbo de 503 cv, freios de carbono-cerâmica e pacote de fibra de carbono."
             },
             "medios": [
                 {
@@ -226,9 +202,7 @@
                     "alt": {
                         "es": "BMW M4 gris al atardecer",
                         "en": "Gray BMW M4 at sunset",
-                        "pt": "BMW M4 cinza ao pôr do sol",
-                        "zh": "夕阳下的灰色宝马M4",
-                        "ja": "夕暮れのグレーのBMW M4"
+                        "pt": "BMW M4 cinza ao pôr do sol"
                     }
                 }
             ]
@@ -252,9 +226,7 @@
             "descripcion": {
                 "es": "V10 atmosférico de 610 hp, tracción integral y escape deportivo. Historial de servicio completo.",
                 "en": "610 hp naturally aspirated V10, all-wheel drive and sport exhaust. Full service history.",
-                "pt": "V10 aspirado de 610 cv, tração integral e escapamento esportivo. Histórico de manutenção completo.",
-                "zh": "610马力自然吸气V10发动机，全轮驱动，运动排气系统。保养记录完整。",
-                "ja": "610馬力の自然吸気V10、全輪駆動、スポーツエキゾースト。整備履歴完備。"
+                "pt": "V10 aspirado de 610 cv, tração integral e escapamento esportivo. Histórico de manutenção completo."
             },
             "medios": [
                 {
@@ -263,9 +235,7 @@
                     "alt": {
                         "es": "Lamborghini Huracán amarillo en la ciudad",
                         "en": "Yellow Lamborghini Huracán in the city",
-                        "pt": "Lamborghini Huracán amarelo na cidade",
-                        "zh": "城市中的黄色兰博基尼Huracán",
-                        "ja": "街中の黄色のランボルギーニ・ウラカン"
+                        "pt": "Lamborghini Huracán amarelo na cidade"
                     }
                 }
             ]
@@ -289,9 +259,7 @@
             "descripcion": {
                 "es": "Superdeportivo con chasis de fibra de carbono, puertas de tijera y V8 biturbo de 710 hp.",
                 "en": "Supercar with carbon fiber chassis, dihedral doors and 710 hp twin-turbo V8.",
-                "pt": "Superesportivo com chassi de fibra de carbono, portas tipo tesoura e V8 biturbo de 710 cv.",
-                "zh": "超级跑车，碳纤维车身结构，蝴蝶门，710马力双涡轮增压V8发动机。",
-                "ja": "カーボンファイバーシャシー、ディヘドラルドア、710馬力ツインターボV8を備えたスーパーカー。"
+                "pt": "Superesportivo com chassi de fibra de carbono, portas tipo tesoura e V8 biturbo de 710 cv."
             },
             "medios": [
                 {
@@ -300,9 +268,7 @@
                     "alt": {
                         "es": "McLaren 720S blanco frente a casas de campo",
                         "en": "White McLaren 720S in front of country houses",
-                        "pt": "McLaren 720S branco diante de casas de campo",
-                        "zh": "乡间房屋前的白色迈凯伦720S",
-                        "ja": "田舎の家並みを背にした白のマクラーレン720S"
+                        "pt": "McLaren 720S branco diante de casas de campo"
                     }
                 }
             ]

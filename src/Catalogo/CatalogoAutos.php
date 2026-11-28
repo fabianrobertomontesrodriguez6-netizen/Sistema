@@ -20,7 +20,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *    que se convierte en la URL pública que genera AssetMapper.
  *
  * "descripcion" y "alt" pueden ser un texto (solo español) o un objeto por
- * idioma, por ejemplo {"es": "...", "en": "...", "ja": "..."}; "es" es obligatorio.
+ * idioma, por ejemplo {"es": "...", "en": "...", "pt": "..."}; "es" es obligatorio.
  */
 final class CatalogoAutos
 {
@@ -51,7 +51,7 @@ final class CatalogoAutos
         private readonly Packages $packages,
         /** @var list<string> */
         #[Autowire('%kernel.enabled_locales%')]
-        private readonly array $idiomas = ['es', 'en', 'pt', 'zh', 'ja'],
+        private readonly array $idiomas = ['es', 'en', 'pt'],
     ) {
     }
 

@@ -11,7 +11,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="color-scheme" content="light dark">
         <title>{% block title %}{{ 'sitio.titulo'|trans }}{% endblock %} · AutoPlaza</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>🚗</text></svg>">
+        {# Icono de la pestaña: el logo de AutoPlaza (generado desde assets/images/autoplaza.png). #}
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
+        <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#c3171d">
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
         {% for codigo in idiomas|keys %}
             <link rel="alternate" hreflang="{{ codigo }}" href="{{ _self.url_idioma(codigo, ruta_actual, params_actuales) }}">
         {% endfor %}
@@ -41,7 +46,10 @@
     <body>
         <header class="cabecera">
             <div class="contenedor cabecera__contenido">
-                <a class="logo" href="{{ app.user ? path('auto_listado') : path('landing') }}">Auto<span>Plaza</span></a>
+                <a class="logo" href="{{ app.user ? path('auto_listado') : path('landing') }}">
+                    <img class="logo__imagen" src="{{ asset('images/logo-cabecera.png') }}" alt="" width="73" height="32">
+                    <span class="logo__texto">Auto<span>Plaza</span></span>
+                </a>
                 <div class="cabecera__acciones">
                     <nav class="menu" aria-label="{{ 'menu.principal'|trans }}">
                         {% if app.user %}
