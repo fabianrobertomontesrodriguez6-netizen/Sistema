@@ -1,37 +1,43 @@
 {# Una consulta en el panel. Recibe "consulta" y "acciones" (bool). #}
-<article class="consulta-item {{ consulta.leida ? 'consulta-item--leida' }}">
-    <header>
-        <strong>{{ consulta.nombre }}</strong>
-        <a class="enlace" href="mailto:{{ consulta.email }}">{{ consulta.email }}</a>
-        {% if consulta.telefono %}<a class="enlace" href="tel:{{ consulta.telefono|replace({' ': ''}) }}">{{ consulta.telefono }}</a>{% endif %}
-        <span class="consulta-item__fecha">{{ consulta.creadaEn|date('d/m/Y H:i') }} · {{ consulta.idioma|upper }}</span>
+{% import '_iconos.html.twig' as i %}
+<article class="consulta-item {{ consulta.leida ? 'consulta-item--leida' }} relative overflow-hidden rounded-3xl border border-borde bg-superficie p-5 shadow-suave transition sm:p-6 {{ consulta.leida ? 'opacity-75 hover:opacity-100' : 'before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-gradient-to-b before:from-marca-500 before:to-orange-400' }}">
+    <header class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <span class="flex items-center gap-3">
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-marca-500 to-marca-700 font-bold text-white uppercase" aria-hidden="true">{{ consulta.nombre|first }}</span>
+            <strong class="text-base">{{ consulta.nombre }}</strong>
+            {% if not consulta.leida %}<span class="size-2 rounded-full bg-marca-500" aria-hidden="true"></span>{% endif %}
+        </span>
+        <a class="inline-flex items-center gap-1.5 text-suave no-underline hover:text-acento" href="mailto:{{ consulta.email }}">{{ i.icono('correo', 'size-4') }}{{ consulta.email }}</a>
+        {% if consulta.telefono %}<a class="inline-flex items-center gap-1.5 text-suave no-underline hover:text-acento" href="tel:{{ consulta.telefono|replace({' ': ''}) }}">{{ i.icono('telefono', 'size-4') }}{{ consulta.telefono|telefono }}</a>{% endif %}
+        <span class="consulta-item__fecha ml-auto rounded-full bg-superficie-2 px-2.5 py-1 text-xs font-semibold text-suave">{{ consulta.creadaEn|date('d/m/Y H:i') }} · {{ consulta.idioma|upper }}</span>
     </header>
-    <p class="consulta-item__auto">
+    <p class="consulta-item__auto mt-4 inline-flex items-center gap-1.5 text-sm font-semibold">
+        {{ i.icono('auto', 'size-4 text-acento') }}
         {% if consulta.vehiculo %}
             <a class="enlace" href="{{ path('auto_detalle', {slug: consulta.vehiculo.slug}) }}">{{ consulta.autoNombre }}</a>
         {% else %}
-            {{ consulta.autoNombre }} <em>({{ 'admin.consulta.auto_borrado'|trans }})</em>
+            {{ consulta.autoNombre }} <em class="font-normal text-suave">({{ 'admin.consulta.auto_borrado'|trans }})</em>
         {% endif %}
     </p>
     {% set traduccion = consulta.traduccion(app.request.locale) %}
     {% if traduccion %}
-        <p class="consulta-item__mensaje" lang="{{ app.request.locale }}">{{ traduccion|nl2br }}</p>
-        <details class="consulta-item__original">
-            <summary>{{ 'admin.consulta.traducida'|trans({idioma: (consulta.idiomaMensaje ?? consulta.idioma)|nombre_idioma}) }} · {{ 'admin.consulta.ver_original'|trans }}</summary>
-            <p class="consulta-item__mensaje" lang="{{ consulta.idiomaMensaje ?? consulta.idioma }}">{{ consulta.mensaje|nl2br }}</p>
+        <p class="consulta-item__mensaje mt-3 rounded-2xl bg-superficie-2/60 p-4 text-pretty" lang="{{ app.request.locale }}">{{ traduccion|nl2br }}</p>
+        <details class="consulta-item__original mt-3 text-sm">
+            <summary class="cursor-pointer font-medium text-suave hover:text-acento">{{ 'admin.consulta.traducida'|trans({idioma: (consulta.idiomaMensaje ?? consulta.idioma)|nombre_idioma}) }} · {{ 'admin.consulta.ver_original'|trans }}</summary>
+            <p class="consulta-item__mensaje mt-2 border-l-2 border-borde pl-4 text-suave italic" lang="{{ consulta.idiomaMensaje ?? consulta.idioma }}">{{ consulta.mensaje|nl2br }}</p>
         </details>
     {% else %}
-        <p class="consulta-item__mensaje">{{ consulta.mensaje|nl2br }}</p>
+        <p class="consulta-item__mensaje mt-3 rounded-2xl bg-superficie-2/60 p-4 text-pretty">{{ consulta.mensaje|nl2br }}</p>
     {% endif %}
     {% if acciones ?? false %}
-        <footer>
+        <footer class="mt-5 flex flex-wrap gap-2 border-t border-borde pt-4">
             <form method="post" action="{{ path('admin_consulta_leida', {id: consulta.id}) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('consulta-' ~ consulta.id) }}">
-                <button type="submit" class="boton-pequeno">{{ (consulta.leida ? 'admin.consulta.marcar_no_leida' : 'admin.consulta.marcar_leida')|trans }}</button>
+                <button type="submit" class="boton-pequeno">{{ i.icono('check', 'size-4') }}{{ (consulta.leida ? 'admin.consulta.marcar_no_leida' : 'admin.consulta.marcar_leida')|trans }}</button>
             </form>
             <form method="post" action="{{ path('admin_consulta_borrar', {id: consulta.id}) }}" data-controller="confirmar" data-confirmar-mensaje-value="{{ 'admin.confirmar_borrar'|trans }}" data-action="submit->confirmar#preguntar">
                 <input type="hidden" name="_token" value="{{ csrf_token('consulta-' ~ consulta.id) }}">
-                <button type="submit" class="boton-pequeno boton-pequeno--peligro">{{ 'admin.borrar'|trans }}</button>
+                <button type="submit" class="boton-pequeno boton-pequeno--peligro">{{ i.icono('papelera', 'size-4') }}{{ 'admin.borrar'|trans }}</button>
             </form>
         </footer>
     {% endif %}

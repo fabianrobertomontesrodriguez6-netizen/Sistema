@@ -14,6 +14,13 @@ export default class extends Controller {
     static targets = ['pestana', 'panel'];
     static values = { parametro: String, limpiar: String };
 
+    // Si la lista de pestañas tiene desplazamiento (modelos de una marca) y la pestaña
+    // abierta queda fuera de la vista (?modelo= de la URL), se desplaza la lista hasta ella.
+    connect() {
+        const activa = this.pestanaTargets.find(p => p.getAttribute('aria-selected') === 'true');
+        if (activa) this.mostrarEnLista(activa);
+    }
+
     seleccionar(evento) {
         evento.preventDefault();
         this.activar(this.pestanaTargets.indexOf(evento.currentTarget), true);
@@ -32,7 +39,23 @@ export default class extends Controller {
         if (destino === undefined) return;
         evento.preventDefault();
         this.activar((destino + total) % total, true);
-        this.pestanaTargets[(destino + total) % total].focus();
+        const pestana = this.pestanaTargets[(destino + total) % total];
+        pestana.focus({ preventScroll: true });
+        this.mostrarEnLista(pestana);
+    }
+
+    // Desplaza solo la lista (no la página, a diferencia de scrollIntoView).
+    mostrarEnLista(pestana) {
+        const lista = pestana.parentElement;
+        if (!lista || (lista.scrollHeight <= lista.clientHeight && lista.scrollWidth <= lista.clientWidth)) return;
+
+        const caja = lista.getBoundingClientRect();
+        const p = pestana.getBoundingClientRect();
+        const margen = 12;
+        if (p.top < caja.top) lista.scrollTop -= caja.top - p.top + margen;
+        else if (p.bottom > caja.bottom) lista.scrollTop += p.bottom - caja.bottom + margen;
+        if (p.left < caja.left) lista.scrollLeft -= caja.left - p.left + margen;
+        else if (p.right > caja.right) lista.scrollLeft += p.right - caja.right + margen;
     }
 
     activar(indice, actualizarUrl) {

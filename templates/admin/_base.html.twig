@@ -1,14 +1,16 @@
 {% extends 'base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block body %}
-    <div class="admin">
-        <nav class="admin__menu" aria-label="{{ 'menu.panel'|trans }}">
-            <a href="{{ path('admin_inicio') }}" {% if ruta_actual == 'admin_inicio' %}aria-current="page"{% endif %}>{{ 'admin.menu.resumen'|trans }}</a>
-            <a href="{{ path('admin_autos') }}" {% if ruta_actual starts with 'admin_auto' %}aria-current="page"{% endif %}>{{ 'admin.menu.autos'|trans }}</a>
-            <a href="{{ path('admin_consultas') }}" {% if ruta_actual starts with 'admin_consulta' %}aria-current="page"{% endif %}>{{ 'admin.menu.consultas'|trans }}</a>
-            <a href="{{ path('admin_usuarios') }}" {% if ruta_actual == 'admin_usuarios' %}aria-current="page"{% endif %}>{{ 'admin.menu.usuarios'|trans }}</a>
+    {% set clase_menu = 'inline-flex shrink-0 items-center gap-3 rounded-2xl px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-suave no-underline transition hover:bg-superficie-2 hover:text-texto aria-[current=page]:bg-marca-600 aria-[current=page]:text-white aria-[current=page]:shadow-brillo' %}
+    <div class="admin grid items-start gap-8 lg:grid-cols-[15rem_1fr]">
+        <nav class="admin__menu cristal scroll-sin-barra flex gap-1 overflow-x-auto p-2 lg:sticky lg:top-24 lg:flex-col" aria-label="{{ 'menu.panel'|trans }}">
+            <a class="{{ clase_menu }}" href="{{ path('admin_inicio') }}" {% if ruta_actual == 'admin_inicio' %}aria-current="page"{% endif %}>{{ i.icono('panel', 'size-[1.1rem]') }}{{ 'admin.menu.resumen'|trans }}</a>
+            <a class="{{ clase_menu }}" href="{{ path('admin_autos') }}" {% if ruta_actual starts with 'admin_auto' %}aria-current="page"{% endif %}>{{ i.icono('auto', 'size-[1.1rem]') }}{{ 'admin.menu.autos'|trans }}</a>
+            <a class="{{ clase_menu }}" href="{{ path('admin_consultas') }}" {% if ruta_actual starts with 'admin_consulta' %}aria-current="page"{% endif %}>{{ i.icono('mensaje', 'size-[1.1rem]') }}{{ 'admin.menu.consultas'|trans }}</a>
+            <a class="{{ clase_menu }}" href="{{ path('admin_usuarios') }}" {% if ruta_actual == 'admin_usuarios' %}aria-current="page"{% endif %}>{{ i.icono('usuarios', 'size-[1.1rem]') }}{{ 'admin.menu.usuarios'|trans }}</a>
         </nav>
-        <div class="admin__contenido">
+        <div class="admin__contenido min-w-0 animate-aparecer [&_h1]:text-2xl sm:[&_h1]:text-3xl [&_h2]:text-lg">
             {% block admin %}{% endblock %}
         </div>
     </div>

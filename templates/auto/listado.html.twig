@@ -1,4 +1,5 @@
 {% extends 'base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block title %}{{ 'listado.titulo'|trans }}{% endblock %}
 
@@ -10,83 +11,108 @@
 {% endmacro %}
 
 {% block body %}
-    <section class="portada">
-        <h1>{{ 'listado.encabezado'|trans }}</h1>
-        <p>{{ 'listado.total'|trans({total: total}) }}</p>
+    {% set etiqueta = 'mb-1.5 block text-xs font-semibold tracking-[0.12em] text-suave uppercase' %}
+
+    <section class="portada mb-8 flex animate-aparecer flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h1 class="text-3xl leading-tight sm:text-4xl lg:text-5xl"><span class="texto-degradado">{{ 'listado.encabezado'|trans }}</span></h1>
+            <p class="mt-3 text-lg text-suave">{{ 'listado.total'|trans({total: total}) }}</p>
+        </div>
     </section>
 
-    <form class="busqueda" method="get" action="{{ path('auto_listado') }}" role="search">
-        <div class="busqueda__barra">
-            <label class="oculto" for="q">{{ 'busqueda.etiqueta'|trans }}</label>
-            <input type="search" id="q" name="q" value="{{ filtros.texto }}" list="sugerencias"
-                   placeholder="{{ 'busqueda.placeholder'|trans }}" autocomplete="off">
-            <datalist id="sugerencias">
-                {% for sugerencia in sugerencias %}<option value="{{ sugerencia }}">{% endfor %}
-            </datalist>
-            <button type="submit" class="boton">{{ 'busqueda.buscar'|trans }}</button>
+    <form class="busqueda cristal relative z-20 mb-10 animate-aparecer p-4 [animation-delay:80ms] sm:p-6" method="get" action="{{ path('auto_listado') }}" role="search"
+          data-controller="conservar-scroll" data-action="submit->conservar-scroll#guardar">
+        <div class="flex flex-col gap-3 md:flex-row md:items-center">
+            <div class="busqueda__barra relative flex flex-1 items-center"
+                 data-controller="autocompletar"
+                 data-autocompletar-sugerencias-value="{{ sugerencias|json_encode }}"
+                 data-autocompletar-marcas-value="{{ marcas|json_encode }}">
+                <label class="oculto" for="q">{{ 'busqueda.etiqueta'|trans }}</label>
+                <span class="pointer-events-none absolute left-5 text-suave">{{ i.icono('buscar', 'size-5') }}</span>
+                <input type="search" id="q" name="q" value="{{ filtros.texto }}"
+                       class="campo h-14 rounded-full! pr-28 pl-13 text-base sm:pr-32 sm:text-lg"
+                       placeholder="{{ 'busqueda.placeholder'|trans }}" autocomplete="off" spellcheck="false"
+                       aria-autocomplete="inline" aria-describedby="q-ayuda"
+                       data-autocompletar-target="entrada"
+                       data-action="input->autocompletar#actualizar focus->autocompletar#actualizar click->autocompletar#actualizar keyup->autocompletar#actualizar blur->autocompletar#quitar keydown->autocompletar#teclado">
+                {# Sugerencia en gris dentro de la barra: copia invisible de lo escrito + lo que falta. #}
+                <div class="autocompletado pointer-events-none absolute inset-y-0 left-0 right-28 flex items-center overflow-hidden border border-transparent pl-13 text-base whitespace-pre sm:right-32 sm:text-lg" aria-hidden="true">
+                    <span class="invisible" data-autocompletar-target="escrito"></span><span class="pointer-events-auto cursor-pointer text-suave/60" data-autocompletar-target="resto" data-action="mousedown->autocompletar#aceptar:prevent" hidden></span>
+                </div>
+                <span id="q-ayuda" class="oculto">{{ 'busqueda.completar_ayuda'|trans }}</span>
+                <button type="submit" class="boton absolute right-1.5 h-11 px-4 sm:px-5">{{ 'busqueda.buscar'|trans }}</button>
+            </div>
+            <a class="boton-pequeno h-14 justify-center px-6 md:h-14" href="{{ path('catalogo') }}">{{ i.icono('catalogo', 'size-4') }} {{ 'busqueda.ver_catalogo'|trans }} {{ i.icono('flecha', 'size-4') }}</a>
         </div>
-        <a class="boton-pequeno" href="{{ path('catalogo') }}">{{ 'busqueda.ver_catalogo'|trans }} →</a>
 
-        <div class="filtros">
-            <label>
+        <div class="filtros mt-5 grid grid-cols-2 items-end gap-3 sm:grid-cols-3 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto_auto]">
+            <label class="{{ etiqueta }}">
                 {{ 'filtros.marca'|trans }}
-                <select name="marca">{{ _self.opciones(marcas, filtros.marca, null) }}</select>
+                <select class="campo mt-1.5 text-sm font-normal tracking-normal normal-case" name="marca">{{ _self.opciones(marcas, filtros.marca, null) }}</select>
             </label>
-            <label>
+            <label class="{{ etiqueta }}">
                 {{ 'filtros.carroceria'|trans }}
-                <select name="carroceria">{{ _self.opciones(carrocerias, filtros.carroceria, 'valores') }}</select>
+                <select class="campo mt-1.5 text-sm font-normal tracking-normal normal-case" name="carroceria">{{ _self.opciones(carrocerias, filtros.carroceria, 'valores') }}</select>
             </label>
-            <label>
+            <label class="{{ etiqueta }} col-span-2 sm:col-span-1">
                 {{ 'filtros.orden'|trans }}
-                <select name="orden">
-                    {% for valor, etiqueta in ordenes %}
-                        <option value="{{ valor }}" {{ filtros.orden == valor ? 'selected' }}>{{ etiqueta|trans }}</option>
+                <select class="campo mt-1.5 text-sm font-normal tracking-normal normal-case" name="orden">
+                    {% for valor, etiqueta_orden in ordenes %}
+                        <option value="{{ valor }}" {{ filtros.orden == valor ? 'selected' }}>{{ etiqueta_orden|trans }}</option>
                     {% endfor %}
                 </select>
             </label>
-            <button type="submit" class="boton boton--secundario">{{ 'filtros.filtrar'|trans }}</button>
+            <button type="submit" class="boton boton--secundario col-span-2 mb-1.5 h-[3.1rem] sm:col-span-1">{{ i.icono('filtro', 'size-4') }} {{ 'filtros.filtrar'|trans }}</button>
             {% if filtros.activos %}
-                <a class="enlace" href="{{ path('auto_listado') }}">{{ 'filtros.quitar'|trans }}</a>
+                <a class="enlace mb-1.5 self-center text-sm" href="{{ path('auto_listado') }}" data-action="conservar-scroll#guardar">{{ 'filtros.quitar'|trans }}</a>
             {% endif %}
         </div>
 
-        <details class="mas-filtros" {{ filtros.avanzados ? 'open' }}>
-            <summary>{{ 'filtros.mas'|trans }}</summary>
-            <div class="filtros filtros--avanzados">
-                <label>
+        <details class="mas-filtros group mt-4 border-t border-borde pt-4" {{ filtros.avanzados ? 'open' }}>
+            <summary class="inline-flex cursor-pointer list-none items-center gap-1.5 text-sm font-semibold text-acento select-none [&::-webkit-details-marker]:hidden">
+                {{ 'filtros.mas'|trans }}
+                <svg class="size-4 transition group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </summary>
+            <div class="filtros filtros--avanzados mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <label class="{{ etiqueta }}">
                     {{ 'auto.combustible'|trans }}
-                    <select name="combustible">{{ _self.opciones(combustibles, filtros.combustible, 'valores') }}</select>
+                    <select class="campo mt-1.5 text-sm font-normal tracking-normal normal-case" name="combustible">{{ _self.opciones(combustibles, filtros.combustible, 'valores') }}</select>
                 </label>
-                <label>
+                <label class="{{ etiqueta }}">
                     {{ 'auto.transmision'|trans }}
-                    <select name="transmision">{{ _self.opciones(transmisiones, filtros.transmision, 'valores') }}</select>
+                    <select class="campo mt-1.5 text-sm font-normal tracking-normal normal-case" name="transmision">{{ _self.opciones(transmisiones, filtros.transmision, 'valores') }}</select>
                 </label>
                 <fieldset class="rango">
-                    <legend>{{ 'filtros.precio'|trans }}</legend>
-                    <label><span class="oculto">{{ 'filtros.desde'|trans }}</span>
-                        <input type="number" name="precio_min" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMin }}" placeholder="{{ 'filtros.desde'|trans }} {{ rangos.precio[0]|numero }}"></label>
-                    <span aria-hidden="true">–</span>
-                    <label><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
-                        <input type="number" name="precio_max" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMax }}" placeholder="{{ 'filtros.hasta'|trans }} {{ rangos.precio[1]|numero }}"></label>
+                    <legend class="{{ etiqueta }}">{{ 'filtros.precio'|trans }}</legend>
+                    <div class="flex items-center gap-2">
+                        <label class="flex-1"><span class="oculto">{{ 'filtros.desde'|trans }}</span>
+                            <input class="campo text-sm" type="number" name="precio_min" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMin }}" placeholder="{{ 'filtros.desde'|trans }} {{ rangos.precio[0]|numero }}"></label>
+                        <span class="text-suave" aria-hidden="true">–</span>
+                        <label class="flex-1"><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
+                            <input class="campo text-sm" type="number" name="precio_max" min="0" step="1000" inputmode="numeric" value="{{ filtros.precioMax }}" placeholder="{{ 'filtros.hasta'|trans }} {{ rangos.precio[1]|numero }}"></label>
+                    </div>
                 </fieldset>
                 <fieldset class="rango">
-                    <legend>{{ 'auto.anio'|trans }}</legend>
-                    <label><span class="oculto">{{ 'filtros.desde'|trans }}</span>
-                        <input type="number" name="anio_min" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMin }}" placeholder="{{ rangos.anio[0] }}"></label>
-                    <span aria-hidden="true">–</span>
-                    <label><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
-                        <input type="number" name="anio_max" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMax }}" placeholder="{{ rangos.anio[1] }}"></label>
+                    <legend class="{{ etiqueta }}">{{ 'auto.anio'|trans }}</legend>
+                    <div class="flex items-center gap-2">
+                        <label class="flex-1"><span class="oculto">{{ 'filtros.desde'|trans }}</span>
+                            <input class="campo text-sm" type="number" name="anio_min" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMin }}" placeholder="{{ rangos.anio[0] }}"></label>
+                        <span class="text-suave" aria-hidden="true">–</span>
+                        <label class="flex-1"><span class="oculto">{{ 'filtros.hasta'|trans }}</span>
+                            <input class="campo text-sm" type="number" name="anio_max" min="1900" max="2100" inputmode="numeric" value="{{ filtros.anioMax }}" placeholder="{{ rangos.anio[1] }}"></label>
+                    </div>
                 </fieldset>
             </div>
         </details>
     </form>
 
+    <div id="resultados" class="scroll-mt-24"></div>
     {% if pagina.total > 0 %}
-        <p class="resultado">
-            {% if filtros.texto %}{{ 'busqueda.resultados'|trans({total: pagina.total, texto: filtros.texto}) }} {% endif %}
+        <p class="resultado mb-5 text-sm text-suave">
+            {% if filtros.texto %}<strong class="text-texto">{{ 'busqueda.resultados'|trans({total: pagina.total, texto: filtros.texto}) }}</strong> · {% endif %}
             {{ 'paginacion.mostrando'|trans({desde: pagina.desde, hasta: pagina.hasta, total: pagina.total}) }}
         </p>
-        <ul class="grilla">
+        <ul class="grilla grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {% for auto in pagina.elementos %}
                 {% include 'auto/_tarjeta.html.twig' %}
             {% endfor %}
@@ -94,26 +120,27 @@
 
         {% if pagina.paginas > 1 %}
             {% set params = app.request.query.all %}
-            <nav class="paginacion" aria-label="{{ 'paginacion.etiqueta'|trans }}">
+            {% set clase_pagina = 'grid h-10 min-w-10 place-items-center rounded-full px-3 text-sm font-semibold no-underline transition' %}
+            <nav class="paginacion mt-12 flex flex-wrap items-center justify-center gap-1.5" aria-label="{{ 'paginacion.etiqueta'|trans }}">
                 {% if pagina.numero > 1 %}
-                    <a href="{{ path('auto_listado', params|merge({pagina: pagina.numero - 1})) }}" rel="prev">← {{ 'paginacion.anterior'|trans }}</a>
+                    <a class="{{ clase_pagina }} border border-borde bg-superficie text-texto hover:border-marca-500/50 hover:text-acento" href="{{ path('auto_listado', params|merge({pagina: pagina.numero - 1, _fragment: 'resultados'})) }}" rel="prev">← {{ 'paginacion.anterior'|trans }}</a>
                 {% endif %}
                 {% for numero in pagina.enlaces %}
                     {% if numero is null %}
-                        <span class="paginacion__hueco">…</span>
+                        <span class="paginacion__hueco px-1 text-suave">…</span>
                     {% elseif numero == pagina.numero %}
-                        <span aria-current="page">{{ numero }}</span>
+                        <span class="{{ clase_pagina }} bg-marca-600 text-white shadow-brillo" aria-current="page">{{ numero }}</span>
                     {% else %}
-                        <a href="{{ path('auto_listado', params|merge({pagina: numero})) }}">{{ numero }}</a>
+                        <a class="{{ clase_pagina }} text-suave hover:bg-superficie-2 hover:text-texto" href="{{ path('auto_listado', params|merge({pagina: numero, _fragment: 'resultados'})) }}">{{ numero }}</a>
                     {% endif %}
                 {% endfor %}
                 {% if pagina.numero < pagina.paginas %}
-                    <a href="{{ path('auto_listado', params|merge({pagina: pagina.numero + 1})) }}" rel="next">{{ 'paginacion.siguiente'|trans }} →</a>
+                    <a class="{{ clase_pagina }} border border-borde bg-superficie text-texto hover:border-marca-500/50 hover:text-acento" href="{{ path('auto_listado', params|merge({pagina: pagina.numero + 1, _fragment: 'resultados'})) }}" rel="next">{{ 'paginacion.siguiente'|trans }} →</a>
                 {% endif %}
             </nav>
         {% endif %}
     {% else %}
-        {% if filtros.texto %}<p class="resultado">{{ 'busqueda.resultados'|trans({total: 0, texto: filtros.texto}) }}</p>{% endif %}
-        <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
+        {% if filtros.texto %}<p class="resultado mb-5 text-sm text-suave">{{ 'busqueda.resultados'|trans({total: 0, texto: filtros.texto}) }}</p>{% endif %}
+        <p class="vacio flex flex-col items-center gap-3">{{ i.icono('auto', 'size-10 text-suave/60') }}{{ 'filtros.vacio'|trans }}</p>
     {% endif %}
 {% endblock %}

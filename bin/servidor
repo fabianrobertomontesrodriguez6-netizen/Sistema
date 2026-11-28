@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+# =========================================================
+# Arranca AutoPlaza en local con UN solo comando:
+#   bin/servidor                 → http://localhost:8000
+#   bin/servidor 0.0.0.0:8000    → también desde otros equipos de la red
+#
+# Pone en marcha, en este orden:
+#   1. LibreTranslate (traductor de las consultas), si está instalado y no está ya en marcha.
+#   2. Tailwind en modo vigilante (vuelve a compilar el CSS al guardar una plantilla).
+#   3. El servidor web de PHP (en primer plano).
+# Ctrl+C lo para todo (solo lo que arrancó este script: un LibreTranslate que ya
+# estaba en marcha, por ejemplo como servicio, se deja como estaba).
+#
+# Registros: var/log/libretranslate.log y var/log/tailwind.log
+# =========================================================
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+DIRECCION="${1:-localhost:8000}"
+LIBRETRANSLATE="${LIBRETRANSLATE_BIN:-$HOME/.local/share/libretranslate/venv/bin/libretranslate}"
+mkdir -p var/log
+
+aviso() { printf '\033[1;31m==>\033[0m \033[1m%s\033[0m\n' "$*"; }
+
+# Dirección del traductor: la de .env.local si la cambia; si no, la de .env.
+url_traductor() {
+    local url=""
+    for archivo in .env .env.local; do
+        [[ -f $archivo ]] || continue
+        local linea
+        linea="$(grep -E '^LIBRETRANSLATE_URL=' "$archivo" | tail -n1 || true)"
+        [[ -n $linea ]] && url="${linea#LIBRETRANSLATE_URL=}"
+    done
+    url="${url%\"}"; url="${url#\"}"
+    echo "${url:-http://127.0.0.1:5000}"
+}
+
+responde() { curl -fsS -m 2 "$1/languages" >/dev/null 2>&1; }
+
+# Cada proceso de fondo va en su propio grupo (setsid) para pararlo con todos sus hijos
+# (tailwind:build lanza el binario de Tailwind; LibreTranslate, sus propios procesos).
+hijos=()
+parar() {
+    trap - EXIT INT TERM
+    for pid in "${hijos[@]}"; do
+        kill -TERM -- "-$pid" 2>/dev/null || true
+    done
+    wait 2>/dev/null || true
+}
+trap parar EXIT INT TERM
+
+# --- 1. LibreTranslate -----------------------------------
+URL="$(url_traductor)"
+HOSTPUERTO="${URL#*://}"; HOSTPUERTO="${HOSTPUERTO%%/*}"
+HOST_LT="${HOSTPUERTO%%:*}"; PUERTO_LT="${HOSTPUERTO##*:}"
+[[ $PUERTO_LT == "$HOSTPUERTO" ]] && PUERTO_LT=5000
+
+if responde "$URL"; then
+    aviso "LibreTranslate ya está en marcha en $URL"
+elif [[ $HOST_LT != 127.0.0.1 && $HOST_LT != localhost ]]; then
+    aviso "LibreTranslate está configurado en otro equipo ($URL) y no responde: las consultas se verán sin traducir."
+elif [[ -x $LIBRETRANSLATE ]]; then
+    aviso "Arrancando LibreTranslate en $URL (tarda unos segundos; registro: var/log/libretranslate.log)"
+    setsid "$LIBRETRANSLATE" --host "$HOST_LT" --port "$PUERTO_LT" --load-only es,en,pt --disable-web-ui \
+        >>var/log/libretranslate.log 2>&1 &
+    hijos+=($!)
+else
+    aviso "LibreTranslate no está instalado ($LIBRETRANSLATE): las consultas se verán sin traducir (ver README)."
+fi
+
+# --- 2. Tailwind -----------------------------------------
+aviso "Tailwind en modo vigilante (registro: var/log/tailwind.log)"
+setsid php bin/console tailwind:build --watch </dev/null >>var/log/tailwind.log 2>&1 &
+hijos+=($!)
+
+# --- 3. Web ----------------------------------------------
+aviso "Web en http://$DIRECCION  (Ctrl+C para parar todo)"
+# Los -d permiten subir fotos y videos grandes desde el panel (por defecto PHP admite 2 MB).
+php -d upload_max_filesize=64M -d post_max_size=70M -S "$DIRECCION" -t public

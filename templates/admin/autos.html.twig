@@ -1,11 +1,12 @@
 {% extends 'admin/_base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block title %}{{ 'admin.menu.autos'|trans }}{% endblock %}
 
 {% block admin %}
-    <div class="admin__fila">
+    <div class="admin__fila mb-8 flex flex-wrap items-center justify-between gap-4">
         <h1>{{ 'admin.menu.autos'|trans }}</h1>
-        <a class="boton" href="{{ path('admin_auto_nuevo') }}">+ {{ 'admin.auto.nuevo'|trans }}</a>
+        <a class="boton" href="{{ path('admin_auto_nuevo') }}">{{ i.icono('mas', 'size-4') }} {{ 'admin.auto.nuevo'|trans }}</a>
     </div>
 
     {% if vehiculos is empty %}
@@ -26,19 +27,21 @@
                     {% for vehiculo in vehiculos %}
                         <tr>
                             <td>
-                                <a class="enlace" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}">{{ vehiculo.nombre }}</a>
+                                <a class="font-semibold text-texto no-underline hover:text-acento" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}">{{ vehiculo.nombre }}</a>
                                 <small>{{ vehiculo.slug }}</small>
                             </td>
-                            <td>{% include 'auto/_precio.html.twig' with {precio: vehiculo.precio} only %}</td>
-                            <td>{{ vehiculo.kilometraje|numero }} km</td>
-                            <td>{{ vehiculo.medios|length }}</td>
-                            <td class="tabla__acciones">
-                                <a class="boton-pequeno" href="{{ path('auto_detalle', {slug: vehiculo.slug}) }}">{{ 'admin.ver'|trans }}</a>
-                                <a class="boton-pequeno" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}">{{ 'admin.editar'|trans }}</a>
-                                <form method="post" action="{{ path('admin_auto_borrar', {id: vehiculo.id}) }}" data-controller="confirmar" data-confirmar-mensaje-value="{{ 'admin.confirmar_borrar'|trans }}" data-action="submit->confirmar#preguntar">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('borrar-auto-' ~ vehiculo.id) }}">
-                                    <button type="submit" class="boton-pequeno boton-pequeno--peligro">{{ 'admin.borrar'|trans }}</button>
-                                </form>
+                            <td class="font-display text-sm whitespace-nowrap">{% include 'auto/_precio.html.twig' with {precio: vehiculo.precio} only %}</td>
+                            <td class="whitespace-nowrap text-suave">{{ vehiculo.kilometraje|numero }} km</td>
+                            <td><span class="rounded-full bg-superficie-2 px-2.5 py-1 text-xs font-bold text-suave">{{ vehiculo.medios|length }}</span></td>
+                            <td>
+                                <div class="tabla__acciones">
+                                    <a class="boton-pequeno" href="{{ path('auto_detalle', {slug: vehiculo.slug}) }}" title="{{ 'admin.ver'|trans }}">{{ i.icono('ojo', 'size-4') }}<span class="hidden xl:inline">{{ 'admin.ver'|trans }}</span></a>
+                                    <a class="boton-pequeno" href="{{ path('admin_auto_editar', {id: vehiculo.id}) }}" title="{{ 'admin.editar'|trans }}">{{ i.icono('lapiz', 'size-4') }}<span class="hidden xl:inline">{{ 'admin.editar'|trans }}</span></a>
+                                    <form method="post" action="{{ path('admin_auto_borrar', {id: vehiculo.id}) }}" data-controller="confirmar" data-confirmar-mensaje-value="{{ 'admin.confirmar_borrar'|trans }}" data-action="submit->confirmar#preguntar">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('borrar-auto-' ~ vehiculo.id) }}">
+                                        <button type="submit" class="boton-pequeno boton-pequeno--peligro" title="{{ 'admin.borrar'|trans }}">{{ i.icono('papelera', 'size-4') }}<span class="hidden xl:inline">{{ 'admin.borrar'|trans }}</span></button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}

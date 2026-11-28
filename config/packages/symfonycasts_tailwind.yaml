@@ -1,0 +1,3 @@
+symfonycasts_tailwind:
+    # Tailwind CSS v4 (binario independiente, sin Node). Se descarga en var/tailwind/ la primera vez.
+    binary_version: 'v4.3.5'

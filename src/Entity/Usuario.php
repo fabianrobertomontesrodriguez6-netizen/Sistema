@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use App\Repository\UsuarioRepository;
 use Doctrine\DBAL\Types\Types;
+use App\Validator\CorreoReal;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -31,6 +32,7 @@ class Usuario implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\NotBlank(message: 'campo.obligatorio')]
     #[Assert\Email(message: 'campo.email_invalido')]
+    #[CorreoReal]
     #[Assert\Length(max: 180, maxMessage: 'campo.muy_largo')]
     private string $email = '';
 

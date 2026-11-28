@@ -6,6 +6,8 @@ namespace App\Entity;
 
 use App\Repository\ConsultaRepository;
 use Doctrine\DBAL\Types\Types;
+use App\Validator\CorreoReal;
+use App\Validator\TelefonoInternacional;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -41,12 +43,14 @@ class Consulta
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: 'campo.obligatorio')]
     #[Assert\Email(message: 'campo.email_invalido')]
+    #[CorreoReal]
     #[Assert\Length(max: 180, maxMessage: 'campo.muy_largo')]
     private string $email = '';
 
+    /** Formato E.164: "+541155551234" (prefijo del país + número). */
     #[ORM\Column(length: 40, nullable: true)]
     #[Assert\Length(max: 40, maxMessage: 'campo.muy_largo')]
-    #[Assert\Regex('/^[0-9 +()\-.]*$/', message: 'consulta.telefono_invalido')]
+    #[TelefonoInternacional]
     private ?string $telefono = null;
 
     #[ORM\Column(type: Types::TEXT)]

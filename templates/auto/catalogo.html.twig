@@ -1,29 +1,34 @@
 {% extends 'base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block title %}{{ 'catalogo.titulo'|trans }}{% endblock %}
 
 {% block body %}
     <a class="enlace volver" href="{{ path('auto_listado') }}">{{ 'catalogo.volver'|trans }}</a>
 
-    <section class="portada">
-        <h1>{{ 'catalogo.titulo'|trans }}</h1>
-        <p>{{ 'catalogo.intro'|trans }}</p>
+    <section class="portada mb-8 animate-aparecer">
+        <h1 class="text-3xl leading-tight sm:text-4xl lg:text-5xl"><span class="texto-degradado">{{ 'catalogo.titulo'|trans }}</span></h1>
+        <p class="mt-3 max-w-2xl text-lg text-suave">{{ 'catalogo.intro'|trans }}</p>
     </section>
 
     {% if secciones is empty %}
         <p class="vacio">{{ 'filtros.vacio'|trans }}</p>
     {% else %}
-        {# Pestañas de marcas; dentro de cada marca, pestañas de modelos. Solo cambia el contenido, la página no se desplaza. #}
+        {# Pestañas de marcas; dentro de cada marca, pestañas de modelos. Solo cambia el contenido, la página no se desplaza.
+           En escritorio la lista de modelos mide lo mismo que la ficha (contain-size: su contenido no la estira; tope de una pantalla)
+           y se recorre con su propia barra (scroll-fino). #}
         <div class="pestanas" data-controller="pestanas" data-pestanas-parametro-value="marca" data-pestanas-limpiar-value="modelo">
-            <div class="pestanas__marcas" role="tablist" aria-label="{{ 'catalogo.marcas'|trans }}">
+            <div class="pestanas__marcas scroll-fino z-30 lg:sticky lg:top-[4.75rem] -mx-4 mb-8 flex gap-2 overflow-x-auto bg-fondo/80 px-4 py-3 backdrop-blur-xl sm:mx-0 sm:flex-wrap sm:rounded-3xl sm:border sm:border-borde sm:bg-superficie/70 sm:p-1.5"
+                 role="tablist" aria-label="{{ 'catalogo.marcas'|trans }}">
                 {% for seccion in secciones %}
                     {% set activa = seccion.clave == marca_activa %}
                     <a href="{{ path('catalogo', {marca: seccion.clave}) }}" role="tab"
+                       class="group inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap text-suave no-underline transition hover:bg-superficie-2 hover:text-texto aria-selected:bg-texto aria-selected:text-fondo aria-selected:shadow-suave"
                        id="pestana-{{ seccion.clave }}" aria-controls="panel-{{ seccion.clave }}"
                        aria-selected="{{ activa ? 'true' : 'false' }}" tabindex="{{ activa ? 0 : -1 }}"
                        data-pestanas-target="pestana" data-clave="{{ seccion.clave }}"
                        data-action="click->pestanas#seleccionar keydown->pestanas#teclado">
-                        {{ seccion.nombre }} <span>{{ seccion.total }}</span>
+                        {{ seccion.nombre }} <span class="rounded-full bg-superficie-2 px-2 py-0.5 text-xs text-suave group-aria-selected:bg-marca-600 group-aria-selected:text-white">{{ seccion.total }}</span>
                     </a>
                 {% endfor %}
             </div>
@@ -33,26 +38,28 @@
                 <section class="pestanas__panel" role="tabpanel" id="panel-{{ seccion.clave }}"
                          aria-labelledby="pestana-{{ seccion.clave }}" data-pestanas-target="panel"
                          {{ seccion.clave != marca_activa ? 'hidden' }}>
-                    <div class="modelos" data-controller="pestanas" data-pestanas-parametro-value="modelo">
-                        <div class="modelos__lista" role="tablist" aria-orientation="vertical"
+                    <div class="modelos grid items-start gap-6 lg:grid-cols-[17rem_1fr]" data-controller="pestanas" data-pestanas-parametro-value="modelo">
+                        <div class="modelos__lista cristal scroll-fino flex gap-1.5 overflow-x-auto p-3 lg:sticky lg:top-[9.5rem] lg:max-h-[calc(100dvh-11rem)] lg:min-h-80 lg:flex-col lg:self-stretch lg:overflow-y-auto lg:contain-size"
+                             role="tablist" aria-orientation="vertical"
                              aria-label="{{ 'catalogo.modelos_de'|trans({marca: seccion.nombre}) }}">
-                            <h2 class="modelos__marca">{{ seccion.nombre }}</h2>
+                            <h2 class="modelos__marca hidden px-3 pt-2 pb-3 text-lg lg:block">{{ seccion.nombre }}</h2>
                             {% for modelo in seccion.modelos %}
                                 {% set abierto = modelo.clave == modelo_abierto %}
                                 <a href="{{ path('catalogo', {marca: seccion.clave, modelo: modelo.clave}) }}" role="tab"
+                                   class="group flex shrink-0 flex-col rounded-2xl border border-transparent px-4 py-2.5 text-sm font-semibold whitespace-nowrap text-texto no-underline transition hover:bg-superficie-2 aria-selected:border-marca-500/30 aria-selected:bg-marca-500/10 aria-selected:text-acento"
                                    id="pestana-{{ seccion.clave }}-{{ modelo.clave }}"
                                    aria-controls="panel-{{ seccion.clave }}-{{ modelo.clave }}"
                                    aria-selected="{{ abierto ? 'true' : 'false' }}" tabindex="{{ abierto ? 0 : -1 }}"
                                    data-pestanas-target="pestana" data-clave="{{ modelo.clave }}"
                                    data-action="click->pestanas#seleccionar keydown->pestanas#teclado">
                                     {{ modelo.nombre }}
-                                    <span>{{ 'catalogo.unidades'|trans({total: modelo.autos|length}) }}</span>
+                                    <span class="text-xs font-medium text-suave">{{ 'catalogo.unidades'|trans({total: modelo.autos|length}) }}</span>
                                 </a>
                             {% endfor %}
                         </div>
 
                         {% for modelo in seccion.modelos %}
-                            <div class="modelos__panel" role="tabpanel" id="panel-{{ seccion.clave }}-{{ modelo.clave }}"
+                            <div class="modelos__panel grid animate-aparecer gap-6" role="tabpanel" id="panel-{{ seccion.clave }}-{{ modelo.clave }}"
                                  aria-labelledby="pestana-{{ seccion.clave }}-{{ modelo.clave }}" data-pestanas-target="panel"
                                  {{ modelo.clave != modelo_abierto ? 'hidden' }}>
                                 {% for auto in modelo.autos %}

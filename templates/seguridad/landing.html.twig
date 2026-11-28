@@ -1,55 +1,80 @@
 {% extends 'base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block title %}{{ 'landing.titulo'|trans }}{% endblock %}
 
 {% block body %}
-    <section class="landing">
-        <div class="landing__texto">
-            <p class="landing__antetitulo">AutoPlaza</p>
-            <h1>{{ 'landing.encabezado'|trans }}</h1>
-            <p class="landing__lema">{{ 'landing.lema'|trans({total: total}) }}</p>
-            <ul class="landing__ventajas">
-                <li>{{ 'landing.ventaja_revisados'|trans }}</li>
-                <li>{{ 'landing.ventaja_fichas'|trans }}</li>
-                <li>{{ 'landing.ventaja_contacto'|trans }}</li>
+    <section class="landing grid items-center gap-12 py-4 lg:grid-cols-[1.15fr_1fr] lg:gap-16 lg:py-10">
+        <div class="landing__texto animate-aparecer">
+            <p class="landing__antetitulo mb-6 inline-flex items-center gap-2 rounded-full border border-marca-500/30 bg-marca-500/10 px-3.5 py-1.5 text-xs font-bold tracking-[0.2em] text-acento uppercase">
+                <span class="relative flex size-2">
+                    <span class="absolute inline-flex size-full animate-ping rounded-full bg-marca-500 opacity-75"></span>
+                    <span class="relative inline-flex size-2 rounded-full bg-marca-500"></span>
+                </span>
+                AutoPlaza
+            </p>
+            <h1 class="text-4xl leading-[1.1] text-balance sm:text-5xl xl:text-6xl">
+                <span class="texto-degradado">{{ 'landing.encabezado'|trans }}</span>
+            </h1>
+            <p class="landing__lema mt-6 max-w-xl text-lg text-pretty text-suave sm:text-xl">{{ 'landing.lema'|trans({total: total}) }}</p>
+            <ul class="landing__ventajas mt-10 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+                {% for clave, icono in {'landing.ventaja_revisados': 'escudo', 'landing.ventaja_fichas': 'velocimetro', 'landing.ventaja_contacto': 'mensaje'} %}
+                    <li class="flex items-start gap-3 rounded-2xl border border-borde bg-superficie/60 p-4 text-sm font-medium backdrop-blur transition hover:-translate-y-0.5 hover:border-marca-500/40 hover:shadow-suave">
+                        <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-marca-500/10 text-acento">{{ i.icono(icono, 'size-5') }}</span>
+                        <span class="pt-1.5">{{ clave|trans }}</span>
+                    </li>
+                {% endfor %}
             </ul>
         </div>
 
-        <div class="panel-entrada">
-            <h2>{{ 'landing.entrar'|trans }}</h2>
-
-            {% if error %}
-                <p class="aviso aviso--error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
-            {% endif %}
-
-            <form method="post" action="{{ path('login_check') }}" class="formulario">
-                <div>
-                    <label for="email">{{ 'registro.email'|trans }}</label>
-                    <input type="email" id="email" name="email" value="{{ ultimo_email }}" autocomplete="email" required autofocus>
+        <div class="relative animate-aparecer [animation-delay:120ms]">
+            <div class="absolute -inset-4 -z-10 rounded-[2.5rem] bg-gradient-to-tr from-marca-600/30 via-orange-400/10 to-transparent blur-2xl" aria-hidden="true"></div>
+            <div class="panel-entrada cristal p-7 sm:p-9">
+                <div class="mb-7 flex items-center gap-3">
+                    <span class="grid size-11 place-items-center rounded-2xl bg-gradient-to-br from-marca-500 to-marca-700 text-white shadow-brillo">{{ i.icono('usuario', 'size-5') }}</span>
+                    <h2 class="text-xl">{{ 'landing.entrar'|trans }}</h2>
                 </div>
-                <div>
-                    <label for="password">{{ 'registro.password'|trans }}</label>
-                    <input type="password" id="password" name="password" autocomplete="current-password" required>
-                </div>
-                <label class="casilla">
-                    <input type="checkbox" name="_remember_me"> {{ 'landing.recordarme'|trans }}
-                </label>
-                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                <button type="submit" class="boton boton--ancho">{{ 'landing.entrar'|trans }}</button>
-            </form>
 
-            <p class="panel-entrada__pie">
-                {{ 'landing.sin_cuenta'|trans }}
-                <a class="enlace" href="{{ path('registro') }}">{{ 'landing.crear_cuenta'|trans }}</a>
-            </p>
+                {% if error %}
+                    <p class="aviso aviso--error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+                {% endif %}
+
+                <form method="post" action="{{ path('login_check') }}" class="formulario">
+                    <div>
+                        <label for="email">{{ 'registro.email'|trans }}</label>
+                        <input type="email" id="email" name="email" value="{{ ultimo_email }}" autocomplete="email" required autofocus>
+                    </div>
+                    <div>
+                        <label for="password">{{ 'registro.password'|trans }}</label>
+                        <input type="password" id="password" name="password" autocomplete="current-password" required>
+                    </div>
+                    <label class="casilla">
+                        <input type="checkbox" name="_remember_me"> {{ 'landing.recordarme'|trans }}
+                    </label>
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+                    <button type="submit" class="boton boton--ancho">{{ 'landing.entrar'|trans }} {{ i.icono('flecha', 'size-4') }}</button>
+                </form>
+
+                <p class="panel-entrada__pie mt-7 border-t border-borde pt-6 text-center text-sm text-suave">
+                    {{ 'landing.sin_cuenta'|trans }}
+                    <a class="enlace" href="{{ path('registro') }}">{{ 'landing.crear_cuenta'|trans }}</a>
+                </p>
+            </div>
         </div>
     </section>
 
     {% if portadas is not empty %}
-        <ul class="landing__fotos" aria-hidden="true">
-            {% for auto in portadas %}
-                <li><img src="{{ auto.portada.url }}" alt="" loading="lazy"></li>
-            {% endfor %}
-        </ul>
+        {# Desfile infinito de fotos: la lista va dos veces para que el bucle no se note. #}
+        <div class="relative -mx-4 mt-16 overflow-hidden py-2 [mask-image:linear-gradient(90deg,transparent,black_10%,black_90%,transparent)] sm:mx-0" aria-hidden="true">
+            <ul class="landing__fotos flex w-max animate-desfile gap-4 hover:[animation-play-state:paused]">
+                {% for vuelta in 1..2 %}
+                    {% for auto in portadas %}
+                        <li class="h-44 w-72 shrink-0 overflow-hidden rounded-3xl border border-borde bg-superficie-2 shadow-suave sm:h-52 sm:w-80">
+                            <img class="size-full object-cover transition duration-700 hover:scale-110" src="{{ auto.portada.url }}" alt="" loading="lazy">
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
     {% endif %}
 {% endblock %}

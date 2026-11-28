@@ -138,6 +138,90 @@ final class SeguridadControllerTest extends WebTestCase
         self::assertSelectorTextContains('form', 'at least 8 characters');
     }
 
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function nombresInvalidos(): iterable
+    {
+        yield 'espacios al inicio' => ['  Fabian', 'cannot start with spaces'];
+        yield 'tabulador al inicio' => ["\tFabian", 'cannot start with spaces'];
+        yield 'caracteres especiales' => ['Fabian@#$', 'only contain letters'];
+        yield 'números' => ['Fabian 2', 'only contain letters'];
+        yield 'html' => ['<b>Fabian</b>', 'only contain letters'];
+        yield 'dos espacios seguidos' => ['Fabian  Pérez', 'only contain letters'];
+    }
+
+    #[\PHPUnit\Framework\Attributes\DataProvider('nombresInvalidos')]
+    public function testRegistroRechazaNombresInvalidos(string $nombre, string $mensaje): void
+    {
+        $cliente = static::createClient();
+        $this->prepararBase($cliente);
+        $pagina = $cliente->request('GET', '/en/registro');
+
+        $cliente->submit($pagina->selectButton('Create account')->form([
+            'registro[nombre]' => $nombre,
+            'registro[email]' => 'otra@ejemplo.com',
+            'registro[plainPassword][first]' => 'una-clave-larga',
+            'registro[plainPassword][second]' => 'una-clave-larga',
+        ]));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('form', $mensaje);
+        self::assertNull($cliente->getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Usuario::class)->findOneBy(['email' => 'otra@ejemplo.com']));
+    }
+
+    public function testRegistroAceptaNombresConAcentosApostrofosYGuiones(): void
+    {
+        $cliente = static::createClient();
+        $this->prepararBase($cliente);
+        $pagina = $cliente->request('GET', '/es/registro');
+
+        $cliente->submit($pagina->selectButton('Crear cuenta')->form([
+            'registro[nombre]' => "José-María O'Brien Núñez",
+            'registro[email]' => 'jose@ejemplo.com',
+            'registro[plainPassword][first]' => 'una-clave-larga',
+            'registro[plainPassword][second]' => 'una-clave-larga',
+        ]));
+
+        self::assertResponseRedirects('/es/autos');
+    }
+
+    public function testRegistroRechazaCorreosDeDominiosQueNoExisten(): void
+    {
+        $cliente = static::createClient();
+        $this->prepararBase($cliente);
+        $pagina = $cliente->request('GET', '/es/registro');
+
+        $cliente->submit($pagina->selectButton('Crear cuenta')->form([
+            'registro[nombre]' => 'Fabian',
+            'registro[email]' => 'fabian@Dominio-Inexistente.com',
+            'registro[plainPassword][first]' => 'una-clave-larga',
+            'registro[plainPassword][second]' => 'una-clave-larga',
+        ]));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('form', 'El dominio «dominio-inexistente.com» no existe o no recibe correo.');
+        self::assertNull($cliente->getContainer()->get(EntityManagerInterface::class)
+            ->getRepository(Usuario::class)->findOneBy(['email' => 'fabian@dominio-inexistente.com']));
+    }
+
+    public function testRegistroAceptaElCorreoSiElDnsNoResponde(): void
+    {
+        $cliente = static::createClient();
+        $this->prepararBase($cliente);
+        $pagina = $cliente->request('GET', '/es/registro');
+
+        $cliente->submit($pagina->selectButton('Crear cuenta')->form([
+            'registro[nombre]' => 'Fabian',
+            'registro[email]' => 'fabian@sindns.com',
+            'registro[plainPassword][first]' => 'una-clave-larga',
+            'registro[plainPassword][second]' => 'una-clave-larga',
+        ]));
+
+        self::assertResponseRedirects('/es/autos');
+    }
+
     public function testUsuarioNormalNoVeNiPuedeAbrirElPanel(): void
     {
         $cliente = static::createClient();

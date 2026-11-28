@@ -1,26 +1,38 @@
 {% extends 'admin/_base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% block title %}{{ 'menu.panel'|trans }}{% endblock %}
 
 {% block admin %}
-    <h1>{{ 'menu.panel'|trans }}</h1>
+    <h1 class="mb-8">{{ 'menu.panel'|trans }}</h1>
 
-    <div class="cifras">
-        <a class="cifra" href="{{ path('admin_autos') }}"><span>{{ total_autos|numero }}</span>{{ 'admin.menu.autos'|trans }}</a>
-        <a class="cifra" href="{{ path('admin_consultas') }}"><span>{{ sin_leer|numero }}</span>{{ 'admin.consulta.sin_leer'|trans }}</a>
-        <a class="cifra" href="{{ path('admin_usuarios') }}"><span>{{ total_usuarios|numero }}</span>{{ 'admin.menu.usuarios'|trans }}</a>
+    {% set clase_cifra = 'cifra group relative flex flex-col gap-1 overflow-hidden rounded-3xl border border-borde bg-superficie p-6 text-sm font-semibold text-suave no-underline shadow-suave transition hover:-translate-y-1 hover:border-marca-500/40 hover:shadow-elevada' %}
+    <div class="cifras mb-12 grid gap-4 sm:grid-cols-3">
+        {% for cifra in [
+            {ruta: 'admin_autos', valor: total_autos, texto: 'admin.menu.autos', icono: 'auto'},
+            {ruta: 'admin_consultas', valor: sin_leer, texto: 'admin.consulta.sin_leer', icono: 'mensaje'},
+            {ruta: 'admin_usuarios', valor: total_usuarios, texto: 'admin.menu.usuarios', icono: 'usuarios'},
+        ] %}
+            <a class="{{ clase_cifra }}" href="{{ path(cifra.ruta) }}">
+                <span class="absolute top-5 right-5 grid size-10 place-items-center rounded-2xl bg-marca-500/10 text-acento transition group-hover:bg-marca-600 group-hover:text-white">{{ i.icono(cifra.icono, 'size-5') }}</span>
+                <span class="font-display text-4xl text-texto">{{ cifra.valor|numero }}</span>
+                {{ cifra.texto|trans }}
+            </a>
+        {% endfor %}
     </div>
 
-    <div class="admin__fila">
+    <div class="admin__fila mb-5 flex flex-wrap items-center justify-between gap-4">
         <h2>{{ 'admin.consulta.recientes'|trans }}</h2>
-        <a class="boton" href="{{ path('admin_auto_nuevo') }}">+ {{ 'admin.auto.nuevo'|trans }}</a>
+        <a class="boton" href="{{ path('admin_auto_nuevo') }}">{{ i.icono('mas', 'size-4') }} {{ 'admin.auto.nuevo'|trans }}</a>
     </div>
     {% if not traductor_disponible %}
         <p class="aviso aviso--error" role="status">{{ 'admin.consulta.traductor_no_disponible'|trans }}</p>
     {% endif %}
-    {% for consulta in consultas %}
-        {% include 'admin/_consulta.html.twig' %}
-    {% else %}
-        <p class="vacio">{{ 'admin.consulta.ninguna'|trans }}</p>
-    {% endfor %}
+    <div class="grid gap-4">
+        {% for consulta in consultas %}
+            {% include 'admin/_consulta.html.twig' %}
+        {% else %}
+            <p class="vacio">{{ 'admin.consulta.ninguna'|trans }}</p>
+        {% endfor %}
+    </div>
 {% endblock %}

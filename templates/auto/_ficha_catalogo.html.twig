@@ -1,19 +1,22 @@
 {# Un auto dentro de la pestaña de su modelo en el catálogo. Recibe "auto". #}
-<article class="ficha-catalogo">
-    <div class="ficha-catalogo__foto">
+{% import '_iconos.html.twig' as i %}
+<article class="ficha-catalogo group grid overflow-hidden rounded-3xl border border-borde bg-superficie shadow-suave transition duration-300 hover:border-marca-500/30 hover:shadow-elevada md:grid-cols-[1.1fr_1fr]">
+    <div class="ficha-catalogo__foto relative aspect-[16/10] overflow-hidden bg-superficie-2 md:aspect-auto md:min-h-80">
         {% if auto.portada %}
-            <img src="{{ auto.portada.url }}" alt="{{ auto.portada.alt.en(app.locale) ?: auto.nombre }}" loading="lazy">
+            <img class="absolute inset-0 size-full object-cover transition duration-700 ease-out group-hover:scale-105" src="{{ auto.portada.url }}" alt="{{ auto.portada.alt.en(app.locale) ?: auto.nombre }}" loading="lazy">
         {% else %}
-            <span class="sin-foto">{{ 'auto.sin_foto'|trans }}</span>
+            <span class="sin-foto absolute inset-0">{{ 'auto.sin_foto'|trans }}</span>
         {% endif %}
-        {% if auto.tieneVideo %}<span class="etiqueta">▶ {{ 'auto.video'|trans }}</span>{% endif %}
+        {% if auto.tieneVideo %}<span class="etiqueta">{{ i.icono('play', 'size-3') }} {{ 'auto.video'|trans }}</span>{% endif %}
         {% if auto.portada and auto.portada.credito %}<p class="galeria__credito">{{ auto.portada.credito }}</p>{% endif %}
     </div>
-    <div class="ficha-catalogo__datos">
-        <h3>{{ auto.marca }} {{ auto.modelo }} <span>{{ auto.anio }}</span></h3>
-        {% if auto.version %}<p class="ficha__version">{{ auto.version }}</p>{% endif %}
-        <p class="precio precio--grande">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
-        <dl class="especificaciones">
+    <div class="ficha-catalogo__datos flex flex-col gap-4 p-6 sm:p-7">
+        <div>
+            <h3 class="font-display text-xl leading-snug">{{ auto.marca }} {{ auto.modelo }} <span class="ml-1 align-middle rounded-full bg-superficie-2 px-2.5 py-0.5 font-sans text-sm font-bold text-suave">{{ auto.anio }}</span></h3>
+            {% if auto.version %}<p class="ficha__version mt-1 text-sm text-suave">{{ auto.version }}</p>{% endif %}
+        </div>
+        <p class="precio precio--grande font-display text-3xl text-acento">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
+        <dl class="especificaciones grid-cols-2! text-sm">
             <div><dt>{{ 'auto.kilometraje'|trans }}</dt><dd>{{ auto.kilometraje|numero }} km</dd></div>
             <div><dt>{{ 'auto.transmision'|trans }}</dt><dd>{{ auto.transmision|trans({}, 'valores') }}</dd></div>
             {% if auto.motor %}<div><dt>{{ 'auto.motor'|trans }}</dt><dd>{{ auto.motor }}</dd></div>{% endif %}
@@ -21,6 +24,6 @@
             {% if auto.aceleracion %}<div><dt>{{ 'auto.aceleracion'|trans }}</dt><dd>{{ auto.aceleracion|numero }} s</dd></div>{% endif %}
             {% if auto.velocidadMaxima %}<div><dt>{{ 'auto.velocidad_maxima'|trans }}</dt><dd>{{ auto.velocidadMaxima|numero }} km/h</dd></div>{% endif %}
         </dl>
-        <a class="boton" href="{{ path('auto_detalle', {slug: auto.slug}) }}">{{ 'catalogo.ver_ficha'|trans }} →</a>
+        <a class="boton mt-auto self-start" href="{{ path('auto_detalle', {slug: auto.slug}) }}">{{ 'catalogo.ver_ficha'|trans }} {{ i.icono('flecha', 'size-4') }}</a>
     </div>
 </article>

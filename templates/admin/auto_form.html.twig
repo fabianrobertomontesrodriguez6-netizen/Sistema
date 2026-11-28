@@ -1,4 +1,5 @@
 {% extends 'admin/_base.html.twig' %}
+{% import '_iconos.html.twig' as i %}
 
 {% macro fila_medio(medio) %}
     <fieldset class="medio" data-coleccion-target="elemento">
@@ -13,7 +14,7 @@
             <summary>{{ 'admin.medio.alt'|trans }}</summary>
             <div class="campos-idiomas">{{ form_widget(medio.alt) }}</div>
         </details>
-        <button type="button" class="boton-pequeno boton-pequeno--peligro" data-action="coleccion#quitar">{{ 'admin.medio.quitar'|trans }}</button>
+        <button type="button" class="boton-pequeno boton-pequeno--peligro" data-action="coleccion#quitar"><svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>{{ 'admin.medio.quitar'|trans }}</button>
     </fieldset>
 {% endmacro %}
 
@@ -21,9 +22,9 @@
 
 {% block admin %}
     <a class="enlace volver" href="{{ path('admin_autos') }}">← {{ 'admin.menu.autos'|trans }}</a>
-    <h1>{{ vehiculo.id ? vehiculo.nombre : 'admin.auto.nuevo'|trans }}</h1>
+    <h1 class="mb-8">{{ vehiculo.id ? vehiculo.nombre : 'admin.auto.nuevo'|trans }}</h1>
 
-    {{ form_start(form, {attr: {class: 'formulario formulario-auto', novalidate: 'novalidate'}}) }}
+    {{ form_start(form, {attr: {class: 'formulario formulario-auto gap-6!', novalidate: 'novalidate'}}) }}
         {% if not form.vars.valid %}
             <div class="aviso aviso--error" role="alert">
                 {{ 'admin.auto.revisar'|trans }}
@@ -78,11 +79,11 @@
                 {% endfor %}
             </div>
             {% do form.medios.setRendered() %}
-            <button type="button" class="boton boton--secundario" data-action="coleccion#agregar">+ {{ 'admin.medio.agregar'|trans }}</button>
+            <button type="button" class="boton boton--secundario" data-action="coleccion#agregar">{{ i.icono('mas', 'size-4') }} {{ 'admin.medio.agregar'|trans }}</button>
         </fieldset>
 
-        <div class="formulario__acciones">
-            <button type="submit" class="boton">{{ 'admin.guardar'|trans }}</button>
+        <div class="formulario__acciones sticky bottom-4 z-20 cristal justify-between p-3 pl-6">
+            <button type="submit" class="boton">{{ i.icono('check', 'size-4') }} {{ 'admin.guardar'|trans }}</button>
             <a class="enlace" href="{{ path('admin_autos') }}">{{ 'admin.cancelar'|trans }}</a>
         </div>
     {{ form_end(form) }}

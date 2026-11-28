@@ -26,3 +26,6 @@ when@test:
     services:
         # Sustituye a LibreTranslate en los tests (ver framework.yaml).
         App\Tests\Soporte\LibreTranslateFalso: ~
+        # Sustituye al DNS al comprobar los dominios de correo (CorreoReal).
+        App\Servicio\ComprobadorDominios: '@App\Tests\Soporte\ComprobadorDominiosFalso'
+        App\Tests\Soporte\ComprobadorDominiosFalso: ~

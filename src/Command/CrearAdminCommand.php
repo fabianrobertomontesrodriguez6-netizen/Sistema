@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\Usuario;
+use App\Validator\NombrePersona;
 use App\Repository\UsuarioRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -45,7 +46,15 @@ final class CrearAdminCommand extends Command
 
         $usuario = $this->usuarios->buscarPorEmail($email);
         $nuevo = null === $usuario;
-        $usuario ??= (new Usuario())->setEmail($email)->setNombre((string) $input->getArgument('nombre'));
+        if ($nuevo) {
+            $nombre = (string) $input->getArgument('nombre');
+            foreach ($this->validator->validate($nombre, new NombrePersona()) as $error) {
+                $io->error('nombre: '.$error->getMessage());
+
+                return Command::FAILURE;
+            }
+            $usuario = (new Usuario())->setEmail($email)->setNombre($nombre);
+        }
 
         // La contraseña se pide oculta para que no quede en el historial de la terminal.
         $password = $io->askHidden($nuevo ? 'Contraseña (mínimo 8 caracteres)' : 'Nueva contraseña (vacío = no cambiarla)');

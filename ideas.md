@@ -108,3 +108,47 @@ Estados: ⏳ Pendiente · 🚧 En curso · ✅ Hecha
 
 - Inicializar git (`git init`) y hacer el primer commit. Conviene hacerlo antes de los cambios grandes. El `.gitignore` ya existe.
 
+Arreglos -
+
+1- Crear un filtro de validacion para no permitir espacios antes de las letras (ejemplo: "  Fabian") y no permitir caracteres especiales.
+   - ✅ Hecho (2026-11-28): restricción `App\Validator\NombrePersona` en el nombre del registro, de "Me interesa" y de `app:crear-admin`. Rechaza espacios al inicio y todo lo que no sean letras (con acentos/ñ) separadas por un espacio, apóstrofo o guion (sin números ni símbolos). Mensajes en es/en/pt.
+
+2- validacion de el emil, uso obligatorio de dominios reales
+   - ✅ Hecho (2026-11-28): restricción `App\Validator\CorreoReal` en el correo de `Usuario` (registro, `app:crear-admin`) y de `Consulta` ("Me interesa"). Consulta el DNS: el dominio necesita MX (o, si no tiene, una IP); se rechazan los que no existen ("gmial.con") y los que declaran que no reciben correo (MX nulo, como example.com). Si el DNS no responde (equipo sin internet) se acepta y se anota en el log. Mensajes en es/en/pt.
+
+3- La barra de buscar tu modelo que no salga el sub menu lateral si no un autocompletado de sugerencia
+   - ✅ Hecho (2026-11-28): autocompletado **en línea**, sin listas ni menús: al escribir "Lambo" aparece "rghini" en gris claro dentro de la misma barra (`assets/controllers/autocompletar_controller.js`). Tab o → lo aceptan (en el móvil, tocar el texto gris); Escape lo quita; Enter busca lo escrito. Sin acentos ni mayúsculas ("hura" → "Huracán"); también completa modelos sueltos. Primer intento (lista desplegable debajo de la barra) descartado: no era lo que se pedía.
+
+4- Areglar el sistema de filtrado para que no te coloque en el inicio de la pagina cuando apliques el filtro y se quede donde el usuario dejo la pagina.
+   - ✅ Hecho (2026-11-28): al filtrar, ordenar, buscar o "Quitar filtros" la página se queda donde estaba el usuario (`assets/controllers/conservar_scroll_controller.js`: guarda la posición al enviar y la recupera cuando Turbo termina de cargar). Se conserva el historial (Atrás deshace el filtro). Al cambiar de página en la paginación se va a los resultados (`#resultados`), no al inicio. Revisado en Chromium con los 140 autos.
+
+5- LibreTranslate debe arrancar solo junto con la página cuando se despliegue (igual cuando se ejecuta en local). Opciones: servicio de systemd en el servidor o contenedor en `compose.yaml` (imagen `libretranslate/libretranslate`, solo es/en/pt), con `LIBRETRANSLATE_URL` apuntando a él. Si no está activo, el panel muestra las consultas sin traducir y un aviso.
+   - ✅ Hecho (2026-11-28): **en local**, `bin/servidor` arranca LibreTranslate (si está instalado y no está ya en marcha), Tailwind y la web con un solo comando; Ctrl+C lo para todo. **En el servidor**, `deploy/desplegar.sh` lo instala como servicio de systemd que arranca con el equipo y con Apache (`deploy/apache2-libretranslate.conf`), se reinicia solo si se cae y avisa si LibreTranslate no está instalado. Se eligió systemd (Docker no está instalado). Si no responde, el panel ya mostraba las consultas sin traducir con un aviso.
+
+6- En catalogo hay un error visual en el body que contiene a los otros botones especialmente al de BMW que lo corta en una esquina. estos son los logs [Sat Nov 28 11:22:23 2026] [::1]:48744 [200]: GET /es/catalogo?marca=chevrolet
+[Sat Nov 28 11:22:23 2026] [::1]:48744 Closing
+[Sat Nov 28 11:22:23 2026] [::1]:48754 Accepted
+[Sat Nov 28 11:22:24 2026] [::1]:48754 [200]: GET /es/catalogo?marca=lamborghini
+[Sat Nov 28 11:22:24 2026] [::1]:48754 Closing
+[Sat Nov 28 11:22:24 2026] [::1]:48764 Accepted
+[Sat Nov 28 11:22:24 2026] [::1]:48764 [200]: GET /es/catalogo?marca=chevrolet
+[Sat Nov 28 11:22:24 2026] [::1]:48764 Closing
+[Sat Nov 28 11:22:24 2026] [::1]:48780 Accepted
+[Sat Nov 28 11:22:24 2026] [::1]:48780 [200]: GET /es/catalogo?marca=fiat
+[Sat Nov 28 11:22:24 2026] [::1]:48780 Closing
+[Sat Nov 28 11:22:24 2026] [::1]:48790 Accepted
+[Sat Nov 28 11:22:24 2026] [::1]:48790 [200]: GET /es/catalogo?marca=ford
+[Sat Nov 28 11:22:24 2026] [::1]:48790 Closing
+[Sat Nov 28 11:22:32 2026] [::1]:43866 Accepted
+[Sat Nov 28 11:22:32 2026] [::1]:43866 [200]: GET /es/catalogo?marca=ford
+[Sat Nov 28 11:22:32 2026] [::1]:43866 Closing
+[Sat Nov 28 11:22:32 2026] [::1]:43872 Accepted
+[Sat Nov 28 11:22:32 2026] [::1]:43872 [200]: GET /es/catalogo?marca=porsche
+   - ✅ Hecho (2026-11-28): la barra de marcas tenía `rounded-full`; por debajo de ~1100 px pasa a dos filas y la curva (radio de la mitad de la altura) recortaba la pestaña de la esquina (BMW). Ahora tiene esquinas de 24 px (`rounded-3xl`): en una fila se ve igual de redonda y en dos ya no recorta.
+
+7- Al estar en catalogo no me deja explorar entre los modelos porque no hay barra de desplazamiento 
+   - ✅ Hecho (2026-11-28): la lista de modelos tenía la barra oculta (`scroll-sin-barra`) y en escritorio medía casi una pantalla desde la mitad de la página, así que su final quedaba fuera de la vista. Ahora usa `scroll-fino` (barra roja delgada y visible, también en la barra de marcas y en la fila de modelos del móvil); en escritorio mide lo mismo que la ficha del auto (mínimo 20 rem, tope de una pantalla); y se desplaza sola hasta el modelo abierto (`?modelo=` de la URL o con el teclado) sin mover la página.
+
+8- En la seccion del formulario de me interesa hay que tener numeros validos, osea no se puede poner cualquier combinacion numerica.
+Tiene que lleavr el id del pais (+X) y el numero telefonico de este
+   - ✅ Hecho (2026-11-28): el teléfono de "Me interesa" se pide en dos partes, **país con su prefijo** ("Argentina (+54)", 245 países en el idioma de la página) y **número**, y se comprueba con libphonenumber (`giggsey/libphonenumber-for-php-lite`) que ese número exista en ese país: largo y formato correctos ("+54 123" no vale). También se puede escribir el número con su prefijo ("+34 612 34 56 78") sin elegir país. Se guarda en formato internacional (`+541155551234`) y se muestra legible en el panel y en el correo ("+54 11 5555-1234"). Sigue siendo opcional. Al elegir el país, el campo muestra un número de ejemplo de ese país. Mensajes en es/en/pt.

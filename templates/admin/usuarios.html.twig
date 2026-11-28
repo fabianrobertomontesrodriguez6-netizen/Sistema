@@ -3,7 +3,7 @@
 {% block title %}{{ 'admin.menu.usuarios'|trans }}{% endblock %}
 
 {% block admin %}
-    <h1>{{ 'admin.menu.usuarios'|trans }}</h1>
+    <h1 class="mb-8">{{ 'admin.menu.usuarios'|trans }}</h1>
     <div class="tabla-envoltura">
         <table class="tabla">
             <thead>
@@ -17,10 +17,21 @@
             <tbody>
                 {% for usuario in usuarios %}
                     <tr>
-                        <td>{{ usuario.nombre }}</td>
-                        <td>{{ usuario.email }}</td>
-                        <td>{{ (usuario.esAdmin ? 'admin.usuario.admin' : 'admin.usuario.cliente')|trans }}</td>
-                        <td>{{ usuario.creadoEn|date('d/m/Y') }}</td>
+                        <td>
+                            <span class="flex items-center gap-3 font-semibold">
+                                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-superficie-2 text-sm font-bold text-suave uppercase" aria-hidden="true">{{ usuario.nombre|first }}</span>
+                                {{ usuario.nombre }}
+                            </span>
+                        </td>
+                        <td class="text-suave">{{ usuario.email }}</td>
+                        <td>
+                            {% if usuario.esAdmin %}
+                                <span class="rounded-full bg-marca-500/10 px-2.5 py-1 text-xs font-bold text-acento">{{ 'admin.usuario.admin'|trans }}</span>
+                            {% else %}
+                                <span class="rounded-full bg-superficie-2 px-2.5 py-1 text-xs font-bold text-suave">{{ 'admin.usuario.cliente'|trans }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="whitespace-nowrap text-suave">{{ usuario.creadoEn|date('d/m/Y') }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

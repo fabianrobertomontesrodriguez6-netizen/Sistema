@@ -1,22 +1,30 @@
 {# Tarjeta de un auto en las grillas. Recibe "auto" y, opcional, "nivel" del título (2 por defecto). #}
+{% import '_iconos.html.twig' as i %}
 {% set nivel = nivel ?? 2 %}
-<li class="tarjeta">
-    <a href="{{ path('auto_detalle', {slug: auto.slug}) }}">
-        <div class="tarjeta__foto">
+<li class="tarjeta group">
+    <a class="flex h-full flex-col overflow-hidden rounded-3xl border border-borde bg-superficie text-texto no-underline shadow-suave transition duration-300 hover:-translate-y-1 hover:border-marca-500/40 hover:shadow-elevada" href="{{ path('auto_detalle', {slug: auto.slug}) }}">
+        <div class="tarjeta__foto relative aspect-[16/10] overflow-hidden bg-superficie-2">
             {% if auto.portada %}
-                <img src="{{ auto.portada.url }}" alt="{{ auto.portada.alt.en(app.locale) ?: auto.nombre }}" loading="lazy">
+                <img class="size-full object-cover transition duration-700 ease-out group-hover:scale-105" src="{{ auto.portada.url }}" alt="{{ auto.portada.alt.en(app.locale) ?: auto.nombre }}" loading="lazy">
             {% else %}
                 <span class="sin-foto">{{ 'auto.sin_foto'|trans }}</span>
             {% endif %}
-            {% if auto.tieneVideo %}<span class="etiqueta">▶ {{ 'auto.video'|trans }}</span>{% endif %}
+            <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" aria-hidden="true"></div>
+            {% if auto.tieneVideo %}<span class="etiqueta">{{ i.icono('play', 'size-3') }} {{ 'auto.video'|trans }}</span>{% endif %}
+            <span class="absolute right-3 bottom-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-bold text-neutral-900 backdrop-blur">{{ auto.anio }}</span>
         </div>
-        <div class="tarjeta__info">
-            <h{{ nivel }} class="tarjeta__titulo">{{ auto.marca }} {{ auto.modelo }}{% if auto.version %} <small>{{ auto.version }}</small>{% endif %}</h{{ nivel }}>
-            <p class="datos">{{ auto.anio }} · {{ auto.kilometraje|numero }} km · {{ auto.transmision|trans({}, 'valores') }}</p>
-            {% if auto.motor or auto.potencia %}
-                <p class="datos datos--motor">{{ auto.motor }}{% if auto.motor and auto.potencia %} · {% endif %}{% if auto.potencia %}{{ auto.potencia|numero }} hp{% endif %}</p>
-            {% endif %}
-            <p class="precio">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
+        <div class="tarjeta__info flex flex-1 flex-col gap-3 p-5">
+            <h{{ nivel }} class="tarjeta__titulo font-sans text-lg leading-snug font-bold tracking-normal">{{ auto.marca }} {{ auto.modelo }}{% if auto.version %} <small class="mt-0.5 block text-sm font-medium text-suave">{{ auto.version }}</small>{% endif %}</h{{ nivel }}>
+            <ul class="datos flex flex-wrap gap-1.5 text-xs font-medium text-suave">
+                <li class="inline-flex items-center gap-1 rounded-full bg-superficie-2 px-2.5 py-1">{{ i.icono('ruta', 'size-3.5') }}{{ auto.kilometraje|numero }} km</li>
+                <li class="inline-flex items-center gap-1 rounded-full bg-superficie-2 px-2.5 py-1">{{ i.icono('cambios', 'size-3.5') }}{{ auto.transmision|trans({}, 'valores') }}</li>
+                {% if auto.potencia %}<li class="datos--motor inline-flex items-center gap-1 rounded-full bg-marca-500/10 px-2.5 py-1 text-acento">{{ i.icono('rayo', 'size-3.5') }}{{ auto.potencia|numero }} hp</li>{% endif %}
+            </ul>
+            {% if auto.motor %}<p class="text-sm text-suave">{{ auto.motor }}</p>{% endif %}
+            <div class="mt-auto flex items-end justify-between gap-2 border-t border-borde pt-4">
+                <p class="precio font-display text-xl text-texto">{% include 'auto/_precio.html.twig' with {precio: auto.precio} only %}</p>
+                <span class="grid size-9 place-items-center rounded-full bg-superficie-2 text-suave transition group-hover:bg-marca-600 group-hover:text-white">{{ i.icono('flecha', 'size-4') }}</span>
+            </div>
         </div>
     </a>
 </li>

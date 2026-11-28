@@ -60,6 +60,25 @@ final class AutoControllerTest extends WebTestCase
         yield ['pt', 'Busque seu modelo', 'Sedã'];
     }
 
+    public function testBarraDeBusquedaConAutocompletadoEnLinea(): void
+    {
+        $pagina = $this->cliente->request('GET', '/en/autos');
+
+        // Sin listas desplegables: ni <datalist> ni listbox; la sugerencia va dentro de la barra.
+        self::assertSelectorNotExists('datalist');
+        self::assertSelectorNotExists('[role="listbox"]');
+        $barra = $pagina->filter('.busqueda__barra[data-controller="autocompletar"]');
+        self::assertCount(1, $barra);
+        self::assertSelectorExists('#q[aria-autocomplete="inline"][data-autocompletar-target="entrada"]');
+        self::assertSelectorExists('.autocompletado[aria-hidden="true"] [data-autocompletar-target="resto"][hidden]');
+        self::assertSelectorTextContains('#q-ayuda', 'press Tab');
+
+        $sugerencias = json_decode((string) $barra->attr('data-autocompletar-sugerencias-value'), true, flags: \JSON_THROW_ON_ERROR);
+        self::assertContains('Lamborghini', $sugerencias);
+        self::assertContains('Lamborghini Huracán', $sugerencias);
+        self::assertContains('Lamborghini', json_decode((string) $barra->attr('data-autocompletar-marcas-value'), true, flags: \JSON_THROW_ON_ERROR));
+    }
+
     public function testBuscarPorMarcaMuestraTodosSusModelos(): void
     {
         $pagina = $this->cliente->request('GET', '/es/autos?q=lamborghini');
@@ -86,6 +105,9 @@ final class AutoControllerTest extends WebTestCase
             $pagina->filter('.tarjeta__titulo')->each(static fn ($h) => $h->text()),
         );
         self::assertSelectorExists('details.mas-filtros[open]');
+        // Al filtrar (o quitar filtros) la página no vuelve arriba: lo hace conservar_scroll_controller.js.
+        self::assertSelectorExists('form.busqueda[data-controller~="conservar-scroll"][data-action~="submit->conservar-scroll#guardar"]');
+        self::assertSelectorExists('form.busqueda a[href="/es/autos"][data-action~="conservar-scroll#guardar"]');
 
         $pagina = $this->cliente->request('GET', '/es/autos?anio_min=2022&orden=precio_asc');
         self::assertSame(['Ford Mustang GT', 'BMW M4'], $pagina->filter('.tarjeta__titulo')->each(static fn ($h) => $h->text()));
@@ -112,7 +134,9 @@ final class AutoControllerTest extends WebTestCase
         self::assertCount(12, $pagina->filter('.tarjeta'));
         self::assertSelectorTextContains('.resultado', 'Mostrando 1–12 de 18.');
         $siguiente = $pagina->filter('.paginacion a[rel="next"]')->attr('href');
-        self::assertSame('/es/autos?orden=precio_asc&pagina=2', $siguiente);
+        // Al cambiar de página se va a los resultados, no al inicio de la página.
+        self::assertSame('/es/autos?orden=precio_asc&pagina=2#resultados', $siguiente);
+        self::assertSelectorExists('#resultados');
 
         $pagina = $this->cliente->request('GET', $siguiente);
         self::assertCount(6, $pagina->filter('.tarjeta'));
@@ -150,6 +174,15 @@ final class AutoControllerTest extends WebTestCase
         self::assertCount(1, $pagina->filter('.pestanas__panel:not([hidden])'));
         self::assertSame('panel-bmw', $pagina->filter('.pestanas__panel:not([hidden])')->attr('id'));
         self::assertStringContainsString('BMW M4', $pagina->filter('#panel-bmw .modelos__panel:not([hidden])')->text());
+
+        // Arreglo 6: las listas de marcas y modelos se recorren con una barra visible (antes estaba oculta)
+        // y la barra de marcas no usa rounded-full (con dos filas recortaba la esquina de BMW).
+        foreach (['.pestanas__marcas', '#panel-bmw .modelos__lista'] as $selector) {
+            $clases = explode(' ', (string) $pagina->filter($selector)->attr('class'));
+            self::assertContains('scroll-fino', $clases, $selector);
+            self::assertNotContains('scroll-sin-barra', $clases, $selector);
+        }
+        self::assertNotContains('sm:rounded-full', explode(' ', (string) $pagina->filter('.pestanas__marcas')->attr('class')));
     }
 
     public function testCatalogoAbreLaMarcaYElModeloDeLaUrl(): void
@@ -205,7 +238,8 @@ final class AutoControllerTest extends WebTestCase
         self::assertStringContainsString('BMW M4 2022', $pagina->filter('#consulta_mensaje')->text());
 
         $this->cliente->submit($pagina->selectButton('Enviar consulta')->form([
-            'consulta[telefono]' => '+54 11 5555-1234',
+            'consulta[telefono][pais]' => 'AR',
+            'consulta[telefono][numero]' => '11 5555-1234',
         ]));
 
         self::assertResponseRedirects('/es/autos/bmw-m4-2022#consulta');
@@ -222,6 +256,73 @@ final class AutoControllerTest extends WebTestCase
         self::assertSame('BMW M4 2022', $consultas[0]->getAutoNombre());
         self::assertSame(self::CLIENTE, $consultas[0]->getUsuario()?->getEmail());
         self::assertFalse($consultas[0]->isLeida());
+        // Se guarda con el prefijo del país, en formato E.164.
+        self::assertSame('+541155551234', $consultas[0]->getTelefono());
+    }
+
+    public function testConsultaTelefonoListaPaisesConPrefijo(): void
+    {
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+
+        self::assertSame('España (+34)', trim($pagina->filter('#consulta_telefono_pais option[value="ES"]')->text()));
+        self::assertSame('612 34 56 78', $pagina->filter('#consulta_telefono_pais option[value="ES"]')->attr('data-ejemplo'));
+        self::assertCount(1, $pagina->filter('#consulta [data-controller="telefono"] #consulta_telefono_numero'));
+
+        $pagina = $this->cliente->request('GET', '/en/autos/bmw-m4-2022');
+        self::assertSame('Spain (+34)', trim($pagina->filter('#consulta_telefono_pais option[value="ES"]')->text()));
+    }
+
+    public function testConsultaAceptaTelefonoConPrefijoEscritoSinElegirPais(): void
+    {
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+        $this->cliente->submit($pagina->selectButton('Enviar consulta')->form([
+            'consulta[telefono][numero]' => '+34 612 34 56 78',
+        ]));
+
+        self::assertResponseRedirects('/es/autos/bmw-m4-2022#consulta');
+        $consultas = $this->cliente->getContainer()->get(EntityManagerInterface::class)->getRepository(Consulta::class)->findAll();
+        self::assertSame('+34612345678', $consultas[0]->getTelefono());
+        self::assertEmailHtmlBodyContains(self::getMailerMessage(), '+34 612 34 56 78');
+    }
+
+    public function testConsultaSinTelefonoSeAcepta(): void
+    {
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+        $this->cliente->submit($pagina->selectButton('Enviar consulta')->form(['consulta[telefono][pais]' => 'ES']));
+
+        self::assertResponseRedirects('/es/autos/bmw-m4-2022#consulta');
+        $consultas = $this->cliente->getContainer()->get(EntityManagerInterface::class)->getRepository(Consulta::class)->findAll();
+        self::assertNull($consultas[0]->getTelefono());
+    }
+
+    /**
+     * @return iterable<string, array{?string, string, string}>
+     */
+    public static function telefonosNoValidos(): iterable
+    {
+        yield 'cifras al azar' => ['AR', '123', 'no existe en el país elegido'];
+        yield 'demasiado largo' => ['ES', '612 34 56 78 99 99', 'no existe en el país elegido'];
+        yield 'número de otro país' => ['ES', '11 5555-1234', 'no existe en el país elegido'];
+        yield 'prefijo inexistente' => [null, '+999 1234 5678', 'no existe en el país elegido'];
+        yield 'sin país ni prefijo' => [null, '612 34 56 78', 'Elige el país del teléfono'];
+        yield 'con letras' => ['US', '1-800-FLOWERS', 'solo puede tener números'];
+    }
+
+    #[DataProvider('telefonosNoValidos')]
+    public function testConsultaRechazaTelefonoNoValido(?string $pais, string $numero, string $error): void
+    {
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+        $formulario = $pagina->selectButton('Enviar consulta')->form(['consulta[telefono][numero]' => $numero]);
+        if (null !== $pais) {
+            $formulario['consulta[telefono][pais]'] = $pais;
+        }
+        $pagina = $this->cliente->submit($formulario);
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('#consulta fieldset', $error);
+        // Lo escrito se conserva para poder corregirlo.
+        self::assertSame($numero, $pagina->filter('#consulta_telefono_numero')->attr('value'));
+        self::assertEmailCount(0);
     }
 
     public function testConsultaConErroresDevuelve422(): void
@@ -236,6 +337,30 @@ final class AutoControllerTest extends WebTestCase
         self::assertResponseStatusCodeSame(422);
         self::assertSelectorTextContains('#consulta', 'Digite um e-mail válido.');
         self::assertSelectorTextContains('#consulta', 'Este campo é obrigatório.');
+        self::assertEmailCount(0);
+    }
+
+    public function testConsultaRechazaNombreConEspaciosOCaracteresEspeciales(): void
+    {
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+        $this->cliente->submit($pagina->selectButton('Enviar consulta')->form(['consulta[nombre]' => '  Fabian']));
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('#consulta', 'El nombre no puede empezar con espacios.');
+
+        $pagina = $this->cliente->request('GET', '/es/autos/bmw-m4-2022');
+        $this->cliente->submit($pagina->selectButton('Enviar consulta')->form(['consulta[nombre]' => 'Fabian!!']));
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('#consulta', 'sin números ni caracteres especiales');
+        self::assertEmailCount(0);
+    }
+
+    public function testConsultaRechazaCorreoDeDominioInexistente(): void
+    {
+        $pagina = $this->cliente->request('GET', '/en/autos/bmw-m4-2022');
+        $this->cliente->submit($pagina->filter('form[name="consulta"]')->form(['consulta[email]' => 'ana@gmial.invalid']));
+
+        self::assertResponseStatusCodeSame(422);
+        self::assertSelectorTextContains('#consulta', 'The domain “gmial.invalid” does not exist or does not receive email.');
         self::assertEmailCount(0);
     }
 

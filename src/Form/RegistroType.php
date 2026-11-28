@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Form;
 
 use App\Entity\Usuario;
+use App\Validator\NombrePersona;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -24,6 +25,9 @@ final class RegistroType extends AbstractType
         $builder
             ->add('nombre', TextType::class, [
                 'label' => 'registro.nombre',
+                // Sin trim: así se rechaza "  Fabian" en lugar de corregirlo en silencio.
+                'trim' => false,
+                'constraints' => [new NombrePersona()],
                 'attr' => ['autocomplete' => 'name'],
             ])
             ->add('email', EmailType::class, [

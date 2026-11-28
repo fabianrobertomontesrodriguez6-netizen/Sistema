@@ -4,8 +4,9 @@
 {%- macro url_idioma(codigo, ruta, params) -%}
     {{ ruta and '_locale' in params|keys ? path(ruta, params|merge({_locale: codigo})) : path('landing', {_locale: codigo}) }}
 {%- endmacro -%}
+{%- import '_iconos.html.twig' as i -%}
 <!DOCTYPE html>
-<html lang="{{ app.locale }}">
+<html lang="{{ app.locale }}" class="scroll-pt-24">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,8 +16,8 @@
         <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('images/favicon-32.png') }}">
         <link rel="icon" type="image/png" sizes="192x192" href="{{ asset('images/favicon-192.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/apple-touch-icon.png') }}">
-        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#c3171d">
-        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000000">
+        <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f8f6f6">
+        <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#050404">
         {% for codigo in idiomas|keys %}
             <link rel="alternate" hreflang="{{ codigo }}" href="{{ _self.url_idioma(codigo, ruta_actual, params_actuales) }}">
         {% endfor %}
@@ -43,57 +44,80 @@
         <script src="https://cdn.jsdelivr.net/npm/frankenphp-hot-reload/+esm" type="module"></script>
         {% endif %}
     </head>
-    <body>
-        <header class="cabecera">
-            <div class="contenedor cabecera__contenido">
-                <a class="logo" href="{{ app.user ? path('auto_listado') : path('landing') }}">
-                    <img class="logo__imagen" src="{{ asset('images/logo-cabecera.png') }}" alt="" width="73" height="32">
-                    <span class="logo__texto">Auto<span>Plaza</span></span>
+    <body class="fondo-pagina flex min-h-dvh flex-col">
+        {# Rejilla tenue detrás de la cabecera (decorativa) #}
+        <div class="rejilla-fondo pointer-events-none absolute inset-x-0 top-0 -z-10 h-[32rem]" aria-hidden="true"></div>
+
+        <header class="cabecera sticky top-0 z-50 border-b border-borde/60 bg-fondo/70 backdrop-blur-xl backdrop-saturate-150">
+            <div class="contenedor cabecera__contenido flex flex-wrap items-center gap-x-6 gap-y-2 py-3">
+                <a class="logo group flex shrink-0 items-center gap-3 no-underline" href="{{ app.user ? path('auto_listado') : path('landing') }}">
+                    <span class="grid h-10 place-items-center rounded-xl px-1.5 transition group-hover:scale-105 dark:bg-white/95 dark:shadow-brillo">
+                        <img class="logo__imagen h-7 w-auto" src="{{ asset('images/logo-cabecera.png') }}" alt="" width="73" height="32">
+                    </span>
+                    <span class="logo__texto font-display text-base leading-none tracking-[0.12em] text-texto uppercase">Auto<span class="text-marca-500">Plaza</span></span>
                 </a>
-                <div class="cabecera__acciones">
-                    <nav class="menu" aria-label="{{ 'menu.principal'|trans }}">
-                        {% if app.user %}
-                            <a href="{{ path('auto_listado') }}" {% if ruta_actual == 'auto_listado' %}aria-current="page"{% endif %}>{{ 'menu.buscar'|trans }}</a>
-                            <a href="{{ path('catalogo') }}" {% if ruta_actual == 'catalogo' %}aria-current="page"{% endif %}>{{ 'menu.catalogo'|trans }}</a>
-                            {# El panel solo aparece para el admin. #}
-                            {% if is_granted('ROLE_ADMIN') %}
-                                <a class="menu__admin" href="{{ path('admin_inicio') }}" {% if ruta_actual starts with 'admin_' %}aria-current="page"{% endif %} title="{{ 'menu.panel'|trans }}">{{ 'menu.panel_corto'|trans }}</a>
-                            {% endif %}
+
+                {% if app.user %}
+                    {% set clase_menu = 'inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap text-suave no-underline transition hover:bg-superficie-2 hover:text-texto aria-[current=page]:bg-texto aria-[current=page]:text-fondo aria-[current=page]:shadow-suave' %}
+                    <nav class="menu scroll-sin-barra order-last -mx-1 flex w-full gap-1 overflow-x-auto px-1 md:order-none md:mx-0 md:w-auto" aria-label="{{ 'menu.principal'|trans }}">
+                        <a class="{{ clase_menu }}" href="{{ path('auto_listado') }}" {% if ruta_actual == 'auto_listado' %}aria-current="page"{% endif %}>{{ i.icono('buscar', 'size-4') }}{{ 'menu.buscar'|trans }}</a>
+                        <a class="{{ clase_menu }}" href="{{ path('catalogo') }}" {% if ruta_actual == 'catalogo' %}aria-current="page"{% endif %}>{{ i.icono('catalogo', 'size-4') }}{{ 'menu.catalogo'|trans }}</a>
+                        {# El panel solo aparece para el admin. #}
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <a class="menu__admin {{ clase_menu }}" href="{{ path('admin_inicio') }}" {% if ruta_actual starts with 'admin_' %}aria-current="page"{% endif %} title="{{ 'menu.panel'|trans }}">{{ i.icono('panel', 'size-4') }}{{ 'menu.panel_corto'|trans }}</a>
                         {% endif %}
                     </nav>
-                    <nav class="idiomas" aria-label="{{ 'menu.idioma'|trans }}">
+                {% endif %}
+
+                <div class="cabecera__acciones ml-auto flex items-center gap-2 sm:gap-3">
+                    <nav class="idiomas flex rounded-full border border-borde bg-superficie/70 p-1 text-xs font-bold" aria-label="{{ 'menu.idioma'|trans }}">
                         {% for codigo, nombre in idiomas %}
                             <a href="{{ _self.url_idioma(codigo, ruta_actual, params_actuales) }}"
+                               class="rounded-full px-2.5 py-1 text-suave no-underline transition hover:text-texto aria-[current=page]:bg-marca-600 aria-[current=page]:text-white aria-[current=page]:shadow-brillo"
                                hreflang="{{ codigo }}" lang="{{ codigo }}" title="{{ nombre }}"
                                {% if codigo == app.locale %}aria-current="page"{% endif %}>{{ codigo|upper }}</a>
                         {% endfor %}
                     </nav>
-                    <button type="button" class="tema" data-controller="tema" data-action="tema#alternar"
+
+                    <button type="button" class="tema group grid size-9 cursor-pointer place-items-center rounded-full border border-borde bg-superficie/70 text-suave transition hover:rotate-12 hover:text-acento"
+                            data-controller="tema" data-action="tema#alternar"
                             aria-label="{{ 'tema.cambiar'|trans }}" title="{{ 'tema.cambiar'|trans }}">
-                        <span class="tema__icono" aria-hidden="true"></span>
+                        <span class="group-aria-pressed:hidden">{{ i.icono('luna', 'size-[1.1rem]') }}</span>
+                        <span class="hidden group-aria-pressed:block">{{ i.icono('sol', 'size-[1.1rem]') }}</span>
                     </button>
+
                     {% if app.user %}
-                        <form class="sesion" method="post" action="{{ path('salir') }}">
-                            <span class="sesion__nombre" title="{{ app.user.email }}">{{ app.user.nombre }}</span>
+                        <form class="sesion flex items-center gap-2" method="post" action="{{ path('salir') }}">
+                            <span class="hidden items-center gap-2 lg:flex">
+                                <span class="grid size-9 place-items-center rounded-full bg-gradient-to-br from-marca-500 to-marca-700 text-sm font-bold text-white uppercase shadow-brillo" aria-hidden="true">{{ app.user.nombre|first }}</span>
+                                <span class="sesion__nombre max-w-32 truncate text-sm font-semibold" title="{{ app.user.email }}">{{ app.user.nombre }}</span>
+                            </span>
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
-                            <button type="submit" class="sesion__salir">{{ 'menu.salir'|trans }}</button>
+                            <button type="submit" class="sesion__salir inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-borde bg-superficie/70 px-3 py-2 text-sm font-semibold text-suave transition hover:border-marca-500/50 hover:text-acento" title="{{ 'menu.salir'|trans }}">
+                                {{ i.icono('salir', 'size-4') }}<span class="hidden sm:inline">{{ 'menu.salir'|trans }}</span>
+                            </button>
                         </form>
                     {% endif %}
                 </div>
             </div>
         </header>
 
-        <main class="contenedor">
+        <main id="contenido" class="contenedor flex-1 pt-8 pb-20 sm:pt-12">
             {% for tipo, mensajes in app.flashes(['exito', 'error']) %}
                 {% for mensaje in mensajes %}
-                    <p class="aviso aviso--{{ tipo }}" role="status">{{ mensaje|trans }}</p>
+                    <p class="aviso aviso--{{ tipo }} animate-aparecer flex-row items-center" role="status">
+                        {{ i.icono(tipo == 'exito' ? 'check_circulo' : 'chispa', 'size-5 shrink-0') }}{{ mensaje|trans }}
+                    </p>
                 {% endfor %}
             {% endfor %}
             {% block body %}{% endblock %}
         </main>
 
-        <footer class="pie">
-            <div class="contenedor">© {{ 'now'|date('Y') }} AutoPlaza · {{ 'sitio.pie'|trans }}</div>
+        <footer class="pie border-t border-borde/70 bg-superficie/50">
+            <div class="contenedor flex flex-col items-center justify-between gap-3 py-8 text-sm text-suave sm:flex-row">
+                <span class="font-display text-xs tracking-[0.2em] text-texto uppercase">Auto<span class="text-marca-500">Plaza</span></span>
+                <span>© {{ 'now'|date('Y') }} AutoPlaza · {{ 'sitio.pie'|trans }}</span>
+            </div>
         </footer>
     </body>
 </html>

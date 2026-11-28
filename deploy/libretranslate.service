@@ -1,0 +1,15 @@
+# LibreTranslate local para traducir las consultas. Lo instala deploy/desplegar.sh
+# en /etc/systemd/system/: arranca con el equipo (sin iniciar sesión) y también cuando
+# arranca Apache (ver apache2-libretranslate.conf). Si se cae, se vuelve a arrancar.
+[Unit]
+Description=LibreTranslate (AutoPlaza)
+After=network.target
+
+[Service]
+User=__USUARIO__
+ExecStart=__HOME__/.local/share/libretranslate/venv/bin/libretranslate --host 127.0.0.1 --port 5000 --load-only es,en,pt --disable-web-ui
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
